@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOTConfessions</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#0d0d0d;color:#eee;min-height:100vh;display:flex;justify-content:center}
+.container{max-width:640px;width:100%;padding:24px}
+h1{font-size:2rem;margin-bottom:4px;background:linear-gradient(135deg,#f55,#f95);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:#888;font-size:.9rem;margin-bottom:24px}
+#status{padding:8px 12px;border-radius:8px;font-size:.85rem;margin-bottom:16px}
+#status.off{background:#2a1a1a;color:#f66}
+#status.on{background:#1a2a1a;color:#6f6}
+textarea{width:100%;padding:12px;border:1px solid #333;border-radius:8px;background:#1a1a1a;color:#eee;font-size:1rem;resize:vertical;min-height:80px;margin-bottom:12px}
+textarea:focus{outline:none;border-color:#f55}
+button{padding:10px 20px;border:none;border-radius:8px;font-size:1rem;cursor:pointer;transition:.2s}
+.btn-primary{background:linear-gradient(135deg,#f55,#f95);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-small{background:#333;color:#eee;padding:6px 12px;font-size:.8rem}
+.btn-small:hover{background:#444}
+.actions{display:flex;gap:8px;margin-bottom:24px;align-items:center}
+.card{background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:16px;margin-bottom:12px}
+.card .msg{font-size:1rem;margin-bottom:8px;word-break:break-word}
+.card .meta{display:flex;justify-content:space-between;align-items:center;color:#666;font-size:.8rem}
+.card .hearts{display:flex;align-items:center;gap:4px}
+.card .hearts button{background:0;border:1px solid #444;border-radius:6px;color:#f55;padding:4px 8px;cursor:pointer;font-size:.8rem}
+.card .hearts button:hover{background:#2a1a1a}
+.card .anon{padding:2px 6px;border-radius:4px;background:#222;color:#888;font-size:.7rem;text-transform:uppercase}
+.empty{text-align:center;color:#555;padding:40px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>BOTConfessions</h1>
+  <p class="sub">Anonymous on-chain confessions. 0.001 tBOT to post, 0.001 tBOT to heart.</p>
+  <div id="status" class="off">Not connected</div>
+  <textarea id="input" placeholder="Write your confession... (keep it clean)"></textarea>
+  <div class="actions">
+    <button class="btn-primary" id="btnPost" disabled>Post (0.001 tBOT)</button>
+    <button class="btn-small" id="btnRefresh">Refresh</button>
+  </div>
+  <div id="list"></div>
+</div>
+<script>
+const ABI = [
+  "function postConfession(string calldata _message) external payable",
+  "function heart(uint256 _id) external payable",
+  "function getConfessions() external view returns (tuple(address author,string message,uint256 timestamp,uint256 hearts)[])",
+  "function getCount() external view returns (uint256)",
+  "event NewConfession(uint256 indexed id, address indexed author)",
+  "event HeartAdded(uint256 indexed id, address indexed from)"
+];
+const CONTRACT = "0x0000000000000000000000000000000000000000"; // ponytail: replace after deploy
+
+let web3, account, contract;
+
+const $ = s => document.querySelector(s);
+const statusEl = $('#status');
+const inputEl = $('#input');
+const btnPost = $('#btnPost');
+const listEl = $('#list');
+
+async function init() {
+  if (!window.ethereum) { statusEl.textContent = 'No MetaMask found'; return; }
+  web3 = new Web3(window.ethereum);
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    account = accounts[0];
+    contract = new web3.eth.Contract(ABI, CONTRACT);
+    statusEl.className = 'on';
+    statusEl.innerHTML = `Connected: ${account.slice(0,6)}...${account.slice(-4)}`;
+    btnPost.disabled = false;
+    loadList();
+  } catch(e) { statusEl.textContent = 'Connection rejected'; }
+  window.ethereum.on('accountsChanged', ([a]) => { account = a; location.reload(); });
+}
+
+btnPost.onclick = async () => {
+  const msg = inputEl.value.trim();
+  if (!msg) return;
+  btnPost.disabled = true;
+  btnPost.textContent = 'Sending...';
+  try {
+    await contract.methods.postConfession(msg).send({ from: account, value: '1000000000000000' });
+    inputEl.value = '';
+    loadList();
+  } catch(e) { alert('Failed: ' + e.message); }
+  btnPost.disabled = false;
+  btnPost.textContent = 'Post (0.001 tBOT)';
+};
+
+async function loadList() {
+  if (!contract) return;
+  try {
+    const data = await contract.methods.getConfessions().call();
+    listEl.innerHTML = data.length
+      ? [...data].reverse().map((c,i) => `
+        <div class="card">
+          <div class="msg">${esc(c.message)}</div>
+          <div class="meta">
+            <span class="anon">Anon #${data.length - 1 - i}</span>
+            <div class="hearts">
+              <button onclick="heartify(${data.length - 1 - i})">♥</button>
+              <span>${c.hearts}</span>
+            </div>
+          </div>
+        </div>`).join('')
+      : '<div class="empty">No confessions yet. Be the first!</div>';
+  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed. Connect MetaMask.</div>'; }
+}
+
+async function heartify(id) {
+  try { await contract.methods.heart(id).send({ from: account, value: '1000000000000000' }); loadList(); }
+  catch(e) { alert('Failed: ' + e.message); }
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+$('#btnRefresh').onclick = loadList;
+init();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/web3@1/dist/web3.min.js"></script>
+</body>
+</html>
