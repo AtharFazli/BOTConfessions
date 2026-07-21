@@ -54,18 +54,19 @@ button{padding:9px 18px;border:none;border-radius:8px;font-size:.88rem;font-weig
   </div>
   <div id="list"></div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/web3@1/dist/web3.min.js"></script>
 <script>
 const ABI = [
-  "function postConfession(string _message) payable",
-  "function heart(uint256 _id) payable",
-  "function getConfessions() view returns (tuple(address author, string message, uint256 timestamp, uint256 hearts)[])",
-  "function getCount() view returns (uint256)",
-  "event NewConfession(uint256 indexed id, address indexed author)",
-  "event HeartAdded(uint256 indexed id, address indexed from)"
+  {"inputs":[{"internalType":"string","name":"_message","type":"string"}],"name":"postConfession","outputs":[],"stateMutability":"payable","type":"function"},
+  {"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"heart","outputs":[],"stateMutability":"payable","type":"function"},
+  {"inputs":[],"name":"getConfessions","outputs":[{"components":[{"internalType":"address","name":"author","type":"address"},{"internalType":"string","name":"message","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"uint256","name":"hearts","type":"uint256"}],"internalType":"struct BOTConfessions.Confession[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},
+  {"inputs":[],"name":"getCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"author","type":"address"}],"name":"NewConfession","type":"event"},
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"from","type":"address"}],"name":"HeartAdded","type":"event"}
 ];
 const CONTRACT = "0x2983b7A9BE9EACE315a0cf6A368FA3D8DDb787F3"; // ponytail: replace after deploy
 
-let signer, contract, account;
+let web3, account, contract;
 
 const $ = s => document.querySelector(s);
 const statusEl = $('#status');
@@ -75,28 +76,20 @@ const listEl = $('#list');
 
 async function init() {
   if (!window.ethereum) { statusEl.textContent = 'Install MetaMask'; return; }
-  if (typeof ethers === 'undefined') { statusEl.textContent = 'ethers not loaded'; return; }
+  web3 = new Web3(window.ethereum);
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    // silent check first
-    let accounts = await provider.listAccounts();
-    if (accounts.length === 0) {
-      accounts = [await provider.getSigner()].filter(Boolean);
-    }
+    let accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (!accounts || accounts.length === 0) {
-      // request explicit connect
-      await provider.send('eth_requestAccounts', []);
-      accounts = await provider.listAccounts();
+      accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     }
-    if (!accounts || accounts.length === 0) { statusEl.textContent = 'No accounts'; return; }
-    signer = await provider.getSigner();
-    account = await signer.getAddress();
-    contract = new ethers.Contract(CONTRACT, ABI, signer);
+    if (!accounts || !accounts[0]) { statusEl.textContent = 'No accounts'; return; }
+    account = accounts[0];
+    contract = new web3.eth.Contract(ABI, CONTRACT);
     statusEl.className = 'on';
     statusEl.textContent = 'Connected: ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
     loadList();
-    window.ethereum.on('accountsChanged', (a) => { if (a && a[0]) location.reload(); });
+    window.ethereum.on('accountsChanged', ([a]) => { if (a) { account = a; location.reload(); } });
   } catch(e) {
     statusEl.textContent = e.code === 4001 ? 'Rejected by user' : (e.message || String(e));
   }
@@ -108,8 +101,7 @@ btnPost.onclick = async () => {
   btnPost.disabled = true;
   btnPost.textContent = 'Sending...';
   try {
-    const tx = await contract.postConfession(msg, { value: ethers.parseEther('0.001') });
-    await tx.wait();
+    await contract.methods.postConfession(msg).send({ from: account, value: '1000000000000000' });
     inputEl.value = '';
     loadList();
   } catch(e) { alert('Failed: ' + (e.message || e)); }
@@ -120,7 +112,7 @@ btnPost.onclick = async () => {
 async function loadList() {
   if (!contract) return;
   try {
-    const data = await contract.getConfessions();
+    const data = await contract.methods.getConfessions().call();
     listEl.innerHTML = data.length
       ? [...data].reverse().map((c,i) => `
         <div class="card" style="animation-delay:${i*40}ms">
@@ -129,21 +121,18 @@ async function loadList() {
             <span class="anon">Anon #${data.length - 1 - i}</span>
             <div class="hearts">
               <button onclick="heartify(${data.length - 1 - i})">♥</button>
-              <span>${Number(c.hearts)}</span>
+              <span>${c.hearts}</span>
             </div>
           </div>
         </div>`).join('')
       : '<div class="empty">No confessions yet. Be the first!</div>';
-  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed. Connect MetaMask.</div>'; }
+  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
 }
 
 async function heartify(id) {
   if (!contract) return;
-  try {
-    const tx = await contract.heart(id, { value: ethers.parseEther('0.001') });
-    await tx.wait();
-    loadList();
-  } catch(e) { alert('Failed: ' + (e.message || e)); }
+  try { await contract.methods.heart(id).send({ from: account, value: '1000000000000000' }); loadList(); }
+  catch(e) { alert('Failed: ' + (e.message || e)); }
 }
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
@@ -151,6 +140,5 @@ $('#btnRefresh').onclick = loadList;
 statusEl.style.cursor = 'pointer';
 statusEl.onclick = init;
 </script>
-<script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.min.js"></script>
 </body>
 </html>
