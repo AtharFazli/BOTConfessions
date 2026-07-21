@@ -46,7 +46,7 @@ button{padding:9px 18px;border:none;border-radius:8px;font-size:.88rem;font-weig
 <div class="container">
   <h1>BOTConfessions</h1>
   <p class="sub">Anonymous on-chain confessions. 0.001 tBOT to post, 0.001 tBOT to heart.</p>
-  <div id="status" class="off">Not connected</div>
+  <div id="status" class="off">Connect Wallet</div>
   <textarea id="input" placeholder="Write your confession... (keep it clean)"></textarea>
   <div class="actions">
     <button class="btn-primary" id="btnPost" disabled>Post (0.001 tBOT)</button>
@@ -74,19 +74,22 @@ const btnPost = $('#btnPost');
 const listEl = $('#list');
 
 async function init() {
-  if (!window.ethereum) { statusEl.textContent = 'No MetaMask found'; return; }
+  if (!window.ethereum) { statusEl.textContent = 'Install MetaMask'; return; }
   web3 = new Web3(window.ethereum);
   try {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
     statusEl.className = 'on';
-    statusEl.innerHTML = `Connected: ${account.slice(0,6)}...${account.slice(-4)}`;
+    statusEl.textContent = `Connected: ${account.slice(0,6)}...${account.slice(-4)}`;
     btnPost.disabled = false;
     loadList();
-  } catch(e) { statusEl.textContent = 'Connection rejected'; }
+  } catch(e) { statusEl.textContent = 'Rejected'; }
   window.ethereum.on('accountsChanged', ([a]) => { account = a; location.reload(); });
 }
+
+statusEl.style.cursor = 'pointer';
+statusEl.onclick = init;
 
 btnPost.onclick = async () => {
   const msg = inputEl.value.trim();
@@ -129,7 +132,6 @@ async function heartify(id) {
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 $('#btnRefresh').onclick = loadList;
-init();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/web3@1/dist/web3.min.js"></script>
 </body>
