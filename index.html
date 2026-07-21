@@ -75,19 +75,25 @@ const listEl = $('#list');
 
 async function init() {
   if (!window.ethereum) { statusEl.textContent = 'Install MetaMask'; return; }
+  if (typeof Web3 === 'undefined') { statusEl.textContent = 'Web3 not loaded'; return; }
   web3 = new Web3(window.ethereum);
   try {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (!accounts || !accounts[0]) throw new Error('No accounts');
+    // try silent check first
+    let accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (!accounts || accounts.length === 0) {
+      // if not connected, request explicit connect
+      accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    }
+    if (!accounts || !accounts[0]) { statusEl.textContent = 'No accounts in wallet'; return; }
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
     statusEl.className = 'on';
-    statusEl.textContent = `Connected: ${account.slice(0,6)}...${account.slice(-4)}`;
+    statusEl.textContent = 'Connected: ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
     loadList();
     window.ethereum.on('accountsChanged', (a) => { if (a && a[0]) { account = a[0]; location.reload(); } });
   } catch(e) {
-    statusEl.textContent = e.code === 4001 ? 'Rejected' : 'Error: ' + (e.message || e);
+    statusEl.textContent = e.code === 4001 ? 'Rejected by user' : (e.message || String(e));
   }
 }
 
