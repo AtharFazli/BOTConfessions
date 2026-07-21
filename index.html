@@ -78,14 +78,17 @@ async function init() {
   web3 = new Web3(window.ethereum);
   try {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!accounts || !accounts[0]) throw new Error('No accounts');
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
     statusEl.className = 'on';
     statusEl.textContent = `Connected: ${account.slice(0,6)}...${account.slice(-4)}`;
     btnPost.disabled = false;
     loadList();
-  } catch(e) { statusEl.textContent = 'Rejected'; }
-  window.ethereum.on('accountsChanged', ([a]) => { account = a; location.reload(); });
+    window.ethereum.on('accountsChanged', (a) => { if (a && a[0]) { account = a[0]; location.reload(); } });
+  } catch(e) {
+    statusEl.textContent = e.code === 4001 ? 'Rejected' : 'Error: ' + (e.message || e);
+  }
 }
 
 statusEl.style.cursor = 'pointer';
