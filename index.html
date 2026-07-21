@@ -101,7 +101,12 @@ btnPost.onclick = async () => {
   btnPost.disabled = true;
   btnPost.textContent = 'Sending...';
   try {
-    await contract.methods.postConfession(msg).send({ from: account, value: '1000000000000000' });
+    const opts = { from: account, value: '1000000000000000' };
+    // ponytail: BOT Chain needs higher gas tip
+    const maxFee = await web3.eth.getGasPrice();
+    opts.maxPriorityFeePerGas = web3.utils.toWei('20', 'gwei');
+    opts.maxFeePerGas = maxFee;
+    await contract.methods.postConfession(msg).send(opts);
     inputEl.value = '';
     loadList();
   } catch(e) { alert('Failed: ' + (e.message || e)); }
@@ -131,7 +136,12 @@ async function loadList() {
 
 async function heartify(id) {
   if (!contract) return;
-  try { await contract.methods.heart(id).send({ from: account, value: '1000000000000000' }); loadList(); }
+  try {
+    const opts = { from: account, value: '1000000000000000' };
+    const maxFee = await web3.eth.getGasPrice();
+    opts.maxPriorityFeePerGas = web3.utils.toWei('20', 'gwei');
+    opts.maxFeePerGas = maxFee;
+    await contract.methods.heart(id).send(opts); loadList(); }
   catch(e) { alert('Failed: ' + (e.message || e)); }
 }
 
