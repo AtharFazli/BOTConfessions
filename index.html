@@ -103,6 +103,8 @@ const RPC = CHAIN.rpc;
 let web3 = new Web3(RPC);
 let contract = new web3.eth.Contract(ABI, CONTRACT);
 let account;
+let loadingList = false;
+let cachedAll = null;
 
 $('#chainSymbolLabel').textContent = CHAIN.symbol;
 $('#btnPost').textContent = 'Post · 0.001 ' + CHAIN.symbol;
@@ -178,9 +180,6 @@ async function loadStats() {
     totalBadge.textContent = count.toString();
   } catch(e) {}
 }
-
-let loadingList = false;
-let cachedAll = null; // ponytail: cache full list for pagination
 
 async function loadList(append) {
   if (!contract || loadingList) return;
