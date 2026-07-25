@@ -82,7 +82,6 @@ textarea::placeholder{color:#55556a}
   <div class="stats">
     <div class="stat"><div class="num" id="statPosts">—</div><span class="lbl">confessions</span></div>
     <div class="stat"><div class="num" id="statHearts">—</div><span class="lbl">hearts</span></div>
-    <div class="stat"><div class="num" id="statWallets">—</div><span class="lbl">unique</span></div>
   </div>
 
   <div id="status" class="off">Connect Wallet</div>
@@ -122,7 +121,7 @@ let web3, account, contract;
 const $ = s => document.querySelector(s);
 const statusEl = $('#status'), inputEl = $('#input'), charCount = $('#charCount');
 const btnPost = $('#btnPost'), listEl = $('#list'), totalBadge = $('#totalBadge');
-const statPosts = $('#statPosts'), statHearts = $('#statHearts'), statWallets = $('#statWallets');
+const statPosts = $('#statPosts'), statHearts = $('#statHearts');
 const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet'};
 const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet'};
 const CHAIN = TESTNET_CHAIN;
