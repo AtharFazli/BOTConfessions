@@ -74,6 +74,20 @@ const inputEl = $('#input');
 const btnPost = $('#btnPost');
 const listEl = $('#list');
 
+const CHAIN_ID = 968;
+const CHAIN_HEX = '0x3c8';
+
+async function checkChain() {
+  const id = await web3.eth.getChainId();
+  if (id !== CHAIN_ID) {
+    statusEl.className = 'off';
+    statusEl.textContent = 'Switch to BOT Chain (ID 968)';
+    btnPost.disabled = true;
+    return false;
+  }
+  return true;
+}
+
 async function init() {
   if (!window.ethereum) { statusEl.textContent = 'Install MetaMask'; return; }
   web3 = new Web3(window.ethereum);
@@ -85,11 +99,13 @@ async function init() {
     if (!accounts || !accounts[0]) { statusEl.textContent = 'No accounts'; return; }
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
+    if (!await checkChain()) return;
     statusEl.className = 'on';
-    statusEl.textContent = 'Connected: ' + account.slice(0,6) + '...' + account.slice(-4);
+    statusEl.textContent = 'BOT Chain · ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
     loadList();
     window.ethereum.on('accountsChanged', ([a]) => { if (a) { account = a; location.reload(); } });
+    window.ethereum.on('chainChanged', () => location.reload());
   } catch(e) {
     statusEl.textContent = e.code === 4001 ? 'Rejected by user' : (e.message || String(e));
   }
@@ -101,11 +117,7 @@ btnPost.onclick = async () => {
   btnPost.disabled = true;
   btnPost.textContent = 'Sending...';
   try {
-    const opts = { from: account, value: '1000000000000000' };
-    // ponytail: BOT Chain needs higher gas tip
-    const maxFee = await web3.eth.getGasPrice();
-    opts.maxPriorityFeePerGas = web3.utils.toWei('20', 'gwei');
-    opts.maxFeePerGas = maxFee;
+    const opts = { from: account, value: '1000000000000000', gasPrice: await web3.eth.getGasPrice() };
     await contract.methods.postConfession(msg).send(opts);
     inputEl.value = '';
     loadList();
@@ -137,10 +149,7 @@ async function loadList() {
 async function heartify(id) {
   if (!contract) return;
   try {
-    const opts = { from: account, value: '1000000000000000' };
-    const maxFee = await web3.eth.getGasPrice();
-    opts.maxPriorityFeePerGas = web3.utils.toWei('20', 'gwei');
-    opts.maxFeePerGas = maxFee;
+    const opts = { from: account, value: '1000000000000000', gasPrice: await web3.eth.getGasPrice() };
     await contract.methods.heart(id).send(opts); loadList(); }
   catch(e) { alert('Failed: ' + (e.message || e)); }
 }
