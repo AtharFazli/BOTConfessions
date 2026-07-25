@@ -84,6 +84,7 @@ const ABI = [
   {inputs:[{internalType:"string",name:"_message",type:"string"}],name:"postConfession",outputs:[],stateMutability:"payable",type:"function"},
   {inputs:[{internalType:"uint256",name:"_index",type:"uint256"}],name:"heart",outputs:[],stateMutability:"payable",type:"function"},
   {inputs:[],name:"getConfessions",outputs:[{components:[{internalType:"uint256",name:"id",type:"uint256"},{internalType:"string",name:"message",type:"string"},{internalType:"uint256",name:"hearts",type:"uint256"}],internalType:"struct BOTConfessions.Confession[]",name:"",type:"tuple[]"}],stateMutability:"view",type:"function"},
+  {inputs:[{internalType:"uint256",name:"start",type:"uint256"},{internalType:"uint256",name:"count",type:"uint256"}],name:"getConfessionsRange",outputs:[{components:[{internalType:"uint256",name:"id",type:"uint256"},{internalType:"string",name:"message",type:"string"},{internalType:"uint256",name:"hearts",type:"uint256"}],internalType:"struct BOTConfessions.Confession[]",name:"",type:"tuple[]"}],stateMutability:"view",type:"function"},
   {inputs:[],name:"getCount",outputs:[{internalType:"uint256",name:"",type:"uint256"}],stateMutability:"view",type:"function"},
   {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"}
 ];
@@ -94,6 +95,7 @@ const btnPost = $('#btnPost'), listEl = $('#list');
 const statPosts = $('#statPosts'), statHearts = $('#statHearts');
 const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet',rpc:'https://rpc.bohr.life',explorer:'https://scan.bohr.life',symbol:'tBOT',name:'BOT Chain Testnet'};
 const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet',rpc:'https://rpc.botchain.ai',explorer:'https://scan.botchain.ai',symbol:'BOT',name:'BOT Chain'};
+// const CHAIN = MAINNET_CHAIN; // <-- aktifin ini abis deploy contract ke mainnet, ganti CONTRACT address juga
 const CHAIN = TESTNET_CHAIN;
 const POST_PRICE = '1000000000000000';
 const HEART_PRICE = '1000000000000000';
@@ -104,7 +106,6 @@ let web3 = new Web3(RPC);
 let contract = new web3.eth.Contract(ABI, CONTRACT);
 let account;
 let loadingList = false;
-let cachedAll = null;
 
 $('#chainSymbolLabel').textContent = CHAIN.symbol;
 $('#btnPost').textContent = 'Post · 0.001 ' + CHAIN.symbol;
@@ -184,14 +185,7 @@ async function loadList(append) {
   if (!contract || loadingList) return;
   loadingList = true;
   try {
-    // ponytail: on-chain contract only has getConfessions(), not getConfessionsRange
-    // fetch all, slice client-side
-    let all = cachedAll;
-    if (!all) {
-      all = await contract.methods.getConfessions().call();
-      cachedAll = all;
-    }
-    const total = all.length;
+    const total = parseInt(await contract.methods.getCount().call());
     if (total === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
     let start, fetchCount = PAGE_SIZE, html = '', totalH = 0;
     if (append) {
@@ -199,21 +193,19 @@ async function loadList(append) {
       if (btns.length === 0) {
         start = Math.max(0, total - PAGE_SIZE);
       } else {
-        let minIdx = Infinity, maxIdx = -1;
-        btns.forEach(b => { const i = parseInt(b.dataset.idx); if (i < minIdx) minIdx = i; if (i > maxIdx) maxIdx = i; });
+        let minIdx = Infinity;
+        btns.forEach(b => { const i = parseInt(b.dataset.idx); if (i < minIdx) minIdx = i; });
         document.querySelectorAll('.card .hearts span').forEach(s => totalH += Number(s.textContent));
-        if (minIdx > 0) {
-          fetchCount = Math.min(PAGE_SIZE, minIdx);
-          start = minIdx - fetchCount;
-        } else {
-          loadingList = false; return;
-        }
+        if (minIdx <= 0) { loadingList = false; return; }
+        fetchCount = Math.min(PAGE_SIZE, minIdx);
+        start = minIdx - fetchCount;
       }
     } else {
       start = Math.max(0, total - PAGE_SIZE);
     }
-    const data = all.slice(start, start + fetchCount);
+    const data = await contract.methods.getConfessionsRange(start, fetchCount).call();
     if (data.length === 0) { if (!append) listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
+    // reverse so newest shows first
     for (let i = data.length - 1; i >= 0; i--) {
       const c = data[i];
       const idx = start + i;
@@ -231,11 +223,7 @@ async function loadList(append) {
     }
     const oldBtn = listEl.querySelector('.btn-load-more');
     if (oldBtn) oldBtn.remove();
-    if (append) {
-      listEl.innerHTML = listEl.innerHTML + html;
-    } else {
-      listEl.innerHTML = html;
-    }
+    listEl.innerHTML = append ? listEl.innerHTML + html : html;
     if (start > 0) {
       const btn = document.createElement('button');
       btn.className = 'btn-load-more';
