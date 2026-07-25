@@ -76,7 +76,7 @@ textarea::placeholder{color:#55556a}
 <body>
 <div class="container">
   <div class="hero">
-    <span class="labels"><span>anon</span><span>on-chain</span><span>${CHAIN.symbol}</span></span>
+    <span class="labels"><span>anon</span><span>on-chain</span><span id="chainSymbolLabel"></span></span>
     <h1>BOTConfessions</h1>
     <p class="tagline">Post what you can't say. No login, no names, just the chain.</p>
   </div>
@@ -92,7 +92,7 @@ textarea::placeholder{color:#55556a}
     <textarea id="input" placeholder="Write your confession..." maxlength="500"></textarea>
     <div class="compose-foot">
       <span class="char-count"><span id="charCount">0</span>/500</span>
-      <button id="btnPost" disabled>Post · 0.001 ${CHAIN.symbol}</button>
+      <button id="btnPost" disabled></button>
     </div>
   </div>
 
@@ -103,7 +103,7 @@ textarea::placeholder{color:#55556a}
   <div id="list"><div class="loading">Loading...</div></div>
 
   <div class="footer">
-    <a href="${CHAIN.explorer}/address/${CONTRACT}" target="_blank" rel="noopener">explorer ↗</a>
+    <a id="explorerLink" href="#" target="_blank" rel="noopener">explorer ↗</a>
     <a href="https://github.com/AtharFazli/BOTConfessions" target="_blank" rel="noopener">github ↗</a>
     <span>anonymous · on-chain · permanent</span>
   </div>
@@ -136,6 +136,11 @@ const RPC = CHAIN.rpc;
 let web3 = new Web3(RPC);
 let contract = new web3.eth.Contract(ABI, CONTRACT);
 let account;
+
+// set dynamic chain-dependent UI
+$('#chainSymbolLabel').textContent = CHAIN.symbol;
+$('#btnPost').textContent = 'Post · 0.001 ' + CHAIN.symbol;
+$('#explorerLink').href = CHAIN.explorer + '/address/' + CONTRACT;
 
 loadStats(); loadList();
 
@@ -180,7 +185,7 @@ async function init() {
     statusEl.textContent = CHAIN.name + ' · ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
     loadStats(); loadList();
-    window.ethereum.on('accountsChanged',([a])=>{if(a){account=a;location.reload()}});
+    window.ethereum.on('accountsChanged',([a])=>{if(a){account=a;location.reload()}else{location.reload()}});
     window.ethereum.on('chainChanged',()=>location.reload());
   } catch(e) { statusEl.textContent = e.code === 4001 ? 'Rejected' : (e.message||String(e)).slice(0,60); }
 }
@@ -208,22 +213,28 @@ async function loadStats() {
   } catch(e) {}
 }
 
+let loadingList = false;
+
 async function loadList(append) {
-  if (!contract) return;
-  if (!append) listEl.innerHTML = '<div class="loading">Loading...</div>';
+  if (!contract || loadingList) return;
+  loadingList = true;
   try {
     const total = Number(await contract.methods.getCount().call());
-    if (total === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; return; }
-    let start = 0, html = '', totalH = 0;
+    if (total === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
+    let start, fetchCount = PAGE_SIZE, html = '', totalH = 0;
     if (append) {
-      start = Math.max(0, total - listEl.querySelectorAll('.card').length - PAGE_SIZE);
-      if (start < 0) start = 0;
+      const loaded = listEl.querySelectorAll('.card').length;
+      const remaining = total - loaded;
+      if (remaining <= 0) { loadingList = false; return; }
+      fetchCount = Math.min(PAGE_SIZE, remaining);
+      start = Math.max(0, total - loaded - fetchCount);
+      // sum existing heart counts from DOM
+      document.querySelectorAll('.card .hearts span').forEach(s => totalH += Number(s.textContent));
     } else {
-      // ponytail: load last PAGE_SIZE confessions from the end
       start = Math.max(0, total - PAGE_SIZE);
     }
-    const data = await contract.methods.getConfessionsRange(start, PAGE_SIZE).call();
-    if (data.length === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; return; }
+    const data = await contract.methods.getConfessionsRange(start, fetchCount).call();
+    if (data.length === 0) { if (!append) listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
     for (let i = data.length - 1; i >= 0; i--) {
       const c = data[i];
       const idx = start + i;
@@ -239,13 +250,13 @@ async function loadList(append) {
         </div>
       </div>`;
     }
+    const oldBtn = listEl.querySelector('.btn-load-more');
+    if (oldBtn) oldBtn.remove();
     if (append) {
-      // ponytail: append older batch AFTER existing (bottom), newest first within batch
       listEl.innerHTML = listEl.innerHTML + html;
     } else {
       listEl.innerHTML = html;
     }
-    // show load more button if there are older confessions
     if (start > 0) {
       const btn = document.createElement('button');
       btn.className = 'btn-load-more';
@@ -265,7 +276,7 @@ async function loadList(append) {
         } catch(e) {}
       });
     }
-  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
+  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; } finally { loadingList = false; }
 }
 function heartify(idx) {
   if (!account) {
@@ -276,7 +287,13 @@ function heartify(idx) {
     try {
       const gp = await web3.eth.getGasPrice();
       await contract.methods.heart(idx).send({from:account,value:HEART_PRICE,gasPrice:gp});
-      loadList();
+      // ponytail: update in-place instead of full reload — keep scroll position
+      const card = document.querySelector(`.card .heart-btn[data-idx="${idx}"]`);
+      if (card) {
+        card.disabled = true; card.classList.add('hearted');
+        const span = card.nextElementSibling;
+        if (span) span.textContent = String(parseInt(span.textContent) + 1);
+      }
       Swal.fire({icon:'success',title:'Heart sent!',timer:1500,showConfirmButton:false,background:'#12121a',color:'#eee',iconColor:'#ff5c6c'});
     } catch(e) { Swal.fire({icon:'error',title:'Failed',text:(e.message||e).slice(0,80),background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}); }
   })();
