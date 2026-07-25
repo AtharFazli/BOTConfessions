@@ -3,9 +3,8 @@ pragma solidity ^0.8.20;
 
 contract BOTConfessions {
     struct Confession {
-        address author;
+        uint256 id;
         string message;
-        uint256 timestamp;
         uint256 hearts;
     }
 
@@ -13,20 +12,27 @@ contract BOTConfessions {
     uint256 public constant POST_PRICE = 0.001 ether;
     uint256 public constant HEART_PRICE = 0.001 ether;
 
-    event NewConfession(uint256 indexed id, address indexed author);
-    event HeartAdded(uint256 indexed id, address indexed from);
+    mapping(uint256 => mapping(address => bool)) public hasHearted;
+
+    event NewConfession(uint256 indexed id, uint256 indexed arrayIndex);
+    event HeartAdded(uint256 indexed arrayIndex, address indexed from);
 
     function postConfession(string calldata _message) external payable {
         require(msg.value >= POST_PRICE, "Need 0.001 tBOT");
-        confessions.push(Confession(msg.sender, _message, block.timestamp, 0));
-        emit NewConfession(confessions.length - 1, msg.sender);
+        uint256 id = uint256(
+            keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao, confessions.length))
+        );
+        confessions.push(Confession(id, _message, 0));
+        emit NewConfession(id, confessions.length - 1);
     }
 
-    function heart(uint256 _id) external payable {
-        require(_id < confessions.length, "Not found");
+    function heart(uint256 _index) external payable {
+        require(_index < confessions.length, "Not found");
         require(msg.value >= HEART_PRICE, "Need 0.001 tBOT");
-        confessions[_id].hearts++;
-        emit HeartAdded(_id, msg.sender);
+        require(!hasHearted[_index][msg.sender], "Already hearted");
+        hasHearted[_index][msg.sender] = true;
+        confessions[_index].hearts++;
+        emit HeartAdded(_index, msg.sender);
     }
 
     function getConfessions() external view returns (Confession[] memory) {

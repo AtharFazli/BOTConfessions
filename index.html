@@ -33,11 +33,12 @@ button{padding:9px 18px;border:none;border-radius:8px;font-size:.88rem;font-weig
 @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .card .msg{font-size:.92rem;line-height:1.55;margin-bottom:10px;word-break:break-word;color:#e0e0ec}
 .card .meta{display:flex;justify-content:space-between;align-items:center}
-.card .anon{font-size:.72rem;color:#55556a;background:#1a1a28;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px}
+.card .anon{font-size:.68rem;color:#55556a;background:#1a1a28;padding:3px 8px;border-radius:5px;font-family:monospace;letter-spacing:.3px}
 .hearts{display:flex;align-items:center;gap:5px}
 .hearts button{background:none;border:1px solid #2a2a40;border-radius:6px;color:#ec5c6b;padding:4px 10px;cursor:pointer;font-size:.82rem;transition:all .15s;line-height:1}
 .hearts button:hover{border-color:#ec5c6b;background:#1c0e12}
 .hearts button:active{transform:scale(.9)}
+.hearts button.hearted{background:#2a1520;border-color:#ec5c6b;opacity:.5;cursor:default}
 .hearts span{font-size:.85rem;color:#9999b0;min-width:1.2em;text-align:center}
 .empty{text-align:center;color:#55556a;padding:48px 0;font-size:.9rem}
 </style>
@@ -58,13 +59,14 @@ button{padding:9px 18px;border:none;border-radius:8px;font-size:.88rem;font-weig
 <script>
 const ABI = [
   {"inputs":[{"internalType":"string","name":"_message","type":"string"}],"name":"postConfession","outputs":[],"stateMutability":"payable","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"heart","outputs":[],"stateMutability":"payable","type":"function"},
-  {"inputs":[],"name":"getConfessions","outputs":[{"components":[{"internalType":"address","name":"author","type":"address"},{"internalType":"string","name":"message","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"uint256","name":"hearts","type":"uint256"}],"internalType":"struct BOTConfessions.Confession[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},
+  {"inputs":[{"internalType":"uint256","name":"_index","type":"uint256"}],"name":"heart","outputs":[],"stateMutability":"payable","type":"function"},
+  {"inputs":[],"name":"getConfessions","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"string","name":"message","type":"string"},{"internalType":"uint256","name":"hearts","type":"uint256"}],"internalType":"struct BOTConfessions.Confession[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"getCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"author","type":"address"}],"name":"NewConfession","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"from","type":"address"}],"name":"HeartAdded","type":"event"}
+  {"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"hasHearted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"arrayIndex","type":"uint256"}],"name":"NewConfession","type":"event"},
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"arrayIndex","type":"uint256"},{"indexed":true,"internalType":"address","name":"from","type":"address"}],"name":"HeartAdded","type":"event"}
 ];
-const CONTRACT = "0x2983b7A9BE9EACE315a0cf6A368FA3D8DDb787F3"; // ponytail: replace after deploy
+const CONTRACT = "PASTE_DEPLOYED_ADDRESS_HERE"; // TODO: replace after deploy
 
 let web3, account, contract;
 
@@ -116,7 +118,7 @@ btnPost.onclick = async () => {
   const msg = inputEl.value.trim();
   if (!msg || !contract) return;
   if (msg.length === 0) { alert('Confession cannot be empty.'); return; }
-  if (msg.length > 500) { alert('Max 500 characters.'); return; } // ponytail: contract no limit, client guard
+  if (msg.length > 500) { alert('Max 500 characters.'); return; }
   btnPost.disabled = true;
   btnPost.textContent = 'Sending...';
   try {
@@ -136,28 +138,38 @@ async function loadList() {
   try {
     const data = await contract.methods.getConfessions().call();
     listEl.innerHTML = data.length
-      ? [...data].reverse().map((c,i) => `
+      ? [...data].reverse().map((c,i) => {
+          const idx = data.length - 1 - i;
+          return `
         <div class="card" style="animation-delay:${i*40}ms">
           <div class="msg">${esc(c.message)}</div>
           <div class="meta">
-            <span class="anon">Anon #${data.length - 1 - i}</span>
+            <span class="anon">#${c.id.toString()}</span>
             <div class="hearts">
-              <button onclick="heartify(${data.length - 1 - i})">♥</button>
+              <button class="heart-btn" data-idx="${idx}" onclick="heartify(${idx})">♥</button>
               <span>${c.hearts}</span>
             </div>
           </div>
-        </div>`).join('')
+        </div>`; }).join('')
       : '<div class="empty">No confessions yet. Be the first!</div>';
+    // check which user already hearted
+    if (account) {
+      document.querySelectorAll('.heart-btn').forEach(async (btn) => {
+        const idx = parseInt(btn.dataset.idx);
+        const done = await contract.methods.hasHearted(idx, account).call();
+        if (done) { btn.disabled = true; btn.classList.add('hearted'); }
+      });
+    }
   } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
   btnRefresh.disabled = false;
   btnRefresh.textContent = 'Refresh';
 }
 
-async function heartify(id) {
+async function heartify(idx) {
   if (!contract) return;
   try {
     const opts = { from: account, value: '1000000000000000', gasPrice: await web3.eth.getGasPrice() };
-    await contract.methods.heart(id).send(opts); loadList(); }
+    await contract.methods.heart(idx).send(opts); loadList(); }
   catch(e) { alert('Failed: ' + (e.message || e)); }
 }
 
@@ -165,6 +177,7 @@ function esc(s) { const d=document.createElement('div'); d.textContent=s; return
 btnRefresh.onclick = loadList;
 statusEl.style.cursor = 'pointer';
 statusEl.onclick = init;
+init();
 </script>
 </body>
 </html>
