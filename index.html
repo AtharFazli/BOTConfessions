@@ -257,7 +257,7 @@ async function loadList(append) {
         } catch(e) {}
       });
     }
-  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; } finally { loadingList = false; }
+  } catch(e) { console.error(e); listEl.innerHTML = 'Load failed: ' + (e.message||String(e)).slice(0,120); } finally { loadingList = false; }
 }
 function heartify(idx) {
   if (!account) {
