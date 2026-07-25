@@ -183,9 +183,9 @@ async function loadList() {
           const idx = data.length - 1 - i;
           return `
         <div class="card" style="animation-delay:${i*40}ms">
-          <div class="msg">${esc(c.message)}</div>
+          <div class="msg">${trunc(esc(c.message))}</div>
           <div class="meta">
-            <span class="anon">#${c.id.toString()}</span>
+            <span class="anon">#${trunc(c.id.toString())}</span>
             <div class="hearts">
               <button class="heart-btn" data-idx="${idx}" onclick="heartify(${idx})">♥</button>
               <span>${c.hearts}</span>
@@ -215,6 +215,7 @@ async function heartify(idx) {
 }
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function trunc(s){return s.length>40 ? s.slice(0,5)+'******'+s.slice(-5) : s;}
 btnRefresh.onclick = loadList;
 statusEl.style.cursor = 'pointer';
 statusEl.onclick = init;
