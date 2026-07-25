@@ -90,7 +90,7 @@ const ABI = [
 const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4";
 const $ = s => document.querySelector(s);
 const statusEl = $('#status'), inputEl = $('#input'), charCount = $('#charCount');
-const btnPost = $('#btnPost'), listEl = $('#list'), totalBadge = $('#totalBadge');
+const btnPost = $('#btnPost'), listEl = $('#list');
 const statPosts = $('#statPosts'), statHearts = $('#statHearts');
 const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet',rpc:'https://rpc.bohr.life',explorer:'https://scan.bohr.life',symbol:'tBOT',name:'BOT Chain Testnet'};
 const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet',rpc:'https://rpc.botchain.ai',explorer:'https://scan.botchain.ai',symbol:'BOT',name:'BOT Chain'};
@@ -177,7 +177,6 @@ async function loadStats() {
   try {
     const count = await contract.methods.getCount().call();
     statPosts.textContent = count.toString();
-    totalBadge.textContent = count.toString();
   } catch(e) {}
 }
 
@@ -245,7 +244,6 @@ async function loadList(append) {
       listEl.appendChild(btn);
     }
     statHearts.textContent = totalH.toString();
-    totalBadge.textContent = total.toString();
     if (account) {
       document.querySelectorAll('.heart-btn:not([data-checked])').forEach(async (btn) => {
         btn.dataset.checked = '1';
