@@ -254,7 +254,7 @@ async function loadList(append) {
         } catch(e) {}
       });
     }
-  } catch(e) { console.error(e); listEl.innerHTML = 'Load failed: ' + (e.message||String(e)).slice(0,120); } finally { loadingList = false; }
+  } catch(e) { console.error(e); listEl.innerHTML = 'Load failed: ' + (e.message||String(e)).slice(0,120); } finally { loadingList = false; statusEl.textContent = CHAIN.name; }
 }
 function heartify(idx) {
   if (!account) {
