@@ -249,8 +249,7 @@ function heartify(idx) {
 function esc(s) {const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function trunc(s){return s.length>40?s.slice(0,5)+'******'+s.slice(-5):s;}
 btnPost.disabled = true;
-statusEl.onclick = init;
-init();
+statusEl.onclick = () => init();
 </script>
 </body>
 </html>
