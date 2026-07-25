@@ -66,7 +66,7 @@ const ABI = [
   {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"arrayIndex","type":"uint256"}],"name":"NewConfession","type":"event"},
   {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"arrayIndex","type":"uint256"},{"indexed":true,"internalType":"address","name":"from","type":"address"}],"name":"HeartAdded","type":"event"}
 ];
-const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4";
+const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4"; // TODO: replace after mainnet deploy
 
 let web3, account, contract;
 
@@ -77,14 +77,18 @@ const btnPost = $('#btnPost');
 const btnRefresh = $('#btnRefresh');
 const listEl = $('#list');
 
-const CHAIN_ID = 968;
-const CHAIN_HEX = '0x3c8';
+const TESTNET_CHAIN = { id: 968, hex: '0x3c8', label: 'testnet' };
+const MAINNET_CHAIN = { id: 677, hex: '0x2a5', label: 'mainnet' };
+
+// ponytail: pick mainnet when deployed there
+const CHAIN = TESTNET_CHAIN;
 
 async function checkChain() {
   const id = await web3.eth.getChainId();
-  if (id !== CHAIN_ID) {
+  if (id !== CHAIN.id) {
     statusEl.className = 'off';
-    statusEl.textContent = 'Switch to BOT Chain (ID 968)';
+    statusEl.textContent = 'Switch to BOT Chain (ID ' + CHAIN.id + ')'+ 
+    '';
     btnPost.disabled = true;
     return false;
   }
