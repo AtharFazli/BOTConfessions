@@ -10,136 +10,123 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0f;color:#ee
 .container{max-width:640px;width:100%;padding:24px;padding-top:max(48px,env(safe-area-inset-top))}
 
 /* hero */
-.hero{text-align:center;margin-bottom:32px}
-.hero h1{font-size:clamp(1.5rem,6vw,2rem);font-weight:800;background:linear-gradient(135deg,#ff6b7c,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;text-wrap:balance}
-.hero .tagline{color:#8888b0;font-size:clamp(.78rem,3vw,.85rem);line-height:1.5;max-width:480px;margin:0 auto}
-.hero .pill{display:inline-block;font-size:.68rem;color:#c084fc;background:#1a0e2e;border:1px solid #2a1a4a;border-radius:999px;padding:4px 14px;margin-bottom:12px;letter-spacing:.3px;text-transform:uppercase}
+.hero{margin-bottom:32px}
+.hero h1{font-size:clamp(1.6rem,7vw,2.2rem);font-weight:900;color:#ff5c6c;margin-bottom:4px;letter-spacing:-.02em;line-height:1.1}
+.hero .tagline{color:#7777aa;font-size:clamp(.78rem,3vw,.85rem);line-height:1.5;max-width:460px}
+.hero .labels{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.hero .labels span{font-size:.6rem;color:#8888b0;background:#12121a;border:1px solid #1e1e2e;padding:2px 10px;border-radius:3px;letter-spacing:.2px}
 
-/* stats */
-.stats{display:flex;gap:12px;margin-bottom:24px}
-.stat{flex:1;background:#12121a;border:1px solid #1e1e2e;border-radius:10px;padding:12px;text-align:center}
-.stat .num{font-size:clamp(1rem,4vw,1.3rem);font-weight:700;color:#ff6b7c}
-.stat .lbl{font-size:.68rem;color:#666680;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+/* stats row — custom divider style instead of uniform cards */
+.stats{display:flex;margin-bottom:28px;border-bottom:1px solid #1a1a28;padding-bottom:20px}
+.stat{flex:1}
+.stat .num{font-size:clamp(1.1rem,4.5vw,1.4rem);font-weight:800;color:#eee;letter-spacing:-.02em}
+.stat .lbl{font-size:.62rem;color:#55556a;margin-top:2px;display:block}
+.stat+.stat{border-left:1px solid #1a1a28;padding-left:16px;margin-left:16px}
 
 /* status */
-#status{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:16px;min-height:44px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-#status::before{content:'';width:8px;height:8px;border-radius:50%;flex-shrink:0}
+#status{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:6px;font-size:.82rem;margin-bottom:16px;min-height:44px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;font-weight:500}
+#status::before{content:'';width:8px;height:8px;border-radius:2px;flex-shrink:0}
 #status.off{background:#1c0e12;color:#f87171}
 #status.off::before{background:#f87171}
 #status.on{background:#0e1c12;color:#4ade80}
 #status.on::before{background:#4ade80}
 
 /* compose */
-textarea{width:100%;padding:14px;border:1px solid #222233;border-radius:10px;background:#16161f;color:#eee;font-size:16px;resize:vertical;min-height:100px;margin-bottom:10px;transition:border-color .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
-textarea::placeholder{color:#7c7c94}
-textarea:focus{outline:none;border-color:#7c5cfc;box-shadow:0 0 0 3px rgba(124,92,252,.15)}
-.char-count{text-align:right;font-size:.72rem;color:#55556a;margin-bottom:10px;margin-top:-6px}
-.char-count.full{color:#f87171}
-.actions{display:flex;gap:8px;margin-bottom:24px;align-items:center}
-@media (max-width:420px){.actions{flex-direction:column}.actions button{width:100%}.btn-small{display:none}}
-
-button{padding:0 18px;border:none;border-radius:8px;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
-.btn-primary{background:#ff6b7c;color:#fff;min-height:44px}
-.btn-primary:hover{background:#e85a6b}
-.btn-primary:active{transform:scale(.97)}
-.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none}
-.btn-small{background:#222233;color:#b0b0c8;min-height:38px;font-size:.8rem}
-.btn-small:hover{background:#2a2a40}
+.compose-wrap{border:1px solid #1e1e2e;border-radius:10px;padding:14px;margin-bottom:16px;background:#12121a}
+textarea{width:100%;border:none;background:transparent;color:#eee;font-size:16px;resize:vertical;min-height:90px;outline:none;font-family:inherit;line-height:1.5}
+textarea::placeholder{color:#55556a}
+.compose-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #1a1a28}
+.compose-foot .char-count{font-size:.7rem;color:#55556a}
+.compose-foot .char-count.full{color:#f87171}
+.compose-foot button{background:#ff5c6c;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;min-height:38px;transition:all .12s}
+.compose-foot button:hover{background:#e84e5e}
+.compose-foot button:active{transform:scale(.97)}
+.compose-foot button:disabled{opacity:.3;cursor:not-allowed;transform:none}
 
 /* feed */
-.section-title{font-size:.72rem;color:#55556a;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.section-title .count-badge{font-size:.65rem;color:#8888a0;background:#1a1a28;padding:2px 10px;border-radius:99px}
-#list{display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a40 transparent;padding-right:4px}
-.card{background:#12121a;border:1px solid #1e1e2e;border-radius:12px;padding:16px;transition:border-color .2s,box-shadow .2s;animation:cardIn .35s ease-out both}
-.card:hover{border-color:#2a2a40;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.feed-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.feed-head h2{font-size:.78rem;font-weight:600;color:#9999b8;letter-spacing:.3px}
+.feed-head .count{font-size:.68rem;color:#55556a;background:#1a1a28;padding:3px 10px;border-radius:3px}
+#list{display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a40 transparent;padding-right:4px}
+.card{background:#12121a;border:1px solid #1a1a28;padding:16px;transition:all .15s;animation:cardIn .3s ease-out both}
+/* ponytail: alternating subtle tint instead of identical cards */
+.card:nth-child(even){border-left:2px solid #ff5c6c}
+.card:nth-child(odd){border-left:2px solid #c084fc}
+.card:hover{background:#16161f}
+@keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}}
-.card .msg{font-size:clamp(.85rem,3vw,.92rem);line-height:1.5;margin-bottom:10px;color:#e0e0ec;word-break:break-all}
+.card .msg{font-size:clamp(.85rem,3vw,.92rem);line-height:1.5;margin-bottom:10px;color:#ddddee;word-break:break-all}
 .card .meta{display:flex;justify-content:space-between;align-items:center}
-.card .anon{font-size:.65rem;color:#55556a;background:#1a1a28;padding:3px 10px;border-radius:99px;font-family:monospace;letter-spacing:.3px}
-.hearts{display:flex;align-items:center;gap:5px}
-.hearts button{background:none;border:1px solid #2a2a40;border-radius:6px;color:#ff6b7c;padding:8px 14px;cursor:pointer;font-size:.85rem;transition:all .15s;line-height:1;min-height:38px}
-.hearts button:hover{border-color:#ff6b7c;background:#1c0e12}
+.card .anon{font-size:.62rem;color:#55556a;font-family:monospace;letter-spacing:.2px}
+.hearts{display:flex;align-items:center;gap:4px}
+.hearts button{background:none;border:1px solid #2a2a40;border-radius:4px;color:#ff5c6c;padding:6px 12px;cursor:pointer;font-size:.82rem;transition:all .12s;line-height:1;min-height:36px}
+.hearts button:hover{border-color:#ff5c6c;background:#1c0e12}
 .hearts button:active{transform:scale(.9)}
-.hearts button.hearted{background:#2a1520;border-color:#ff6b7c;opacity:.5;cursor:default}
-.hearts span{font-size:.85rem;color:#9999b0;min-width:1.2em;text-align:center}
-.empty{text-align:center;color:#55556a;padding:48px 0;font-size:.9rem}
-.loading{text-align:center;color:#55556a;padding:24px 0;font-size:.85rem;animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.hearts button.hearted{background:#2a1520;border-color:#ff5c6c;opacity:.4;cursor:default}
+.hearts span{font-size:.82rem;color:#9999b0;min-width:1.2em;text-align:center}
+.empty{text-align:center;color:#55556a;padding:48px 0;font-size:.85rem}
+.loading{text-align:center;color:#55556a;padding:24px 0;font-size:.8rem}
 
 /* footer */
-.footer{text-align:center;padding:32px 0 48px;font-size:.72rem;color:#444460;display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}
-.footer a{color:#6666a0;text-decoration:none;transition:color .15s}
-.footer a:hover{color:#c084fc}
+.footer{border-top:1px solid #1a1a28;margin-top:32px;padding:20px 0 40px;font-size:.7rem;color:#444460;display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}
+.footer a{color:#6666a0;text-decoration:none}
+.footer a:hover{color:#ff5c6c}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="hero">
-    <div class="pill">BOT Chain</div>
+    <div class="labels"><span>anon</span><span>on-chain</span><span>BOT</span></div>
     <h1>BOTConfessions</h1>
-    <p class="tagline">Anonymous. On-chain. Permanent. Post confessions, share hearts — no accounts, no backend, just the chain.</p>
+    <p class="tagline">Post what you can't say. No login, no names, just the chain.</p>
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="num" id="statPosts">—</div><div class="lbl">Confessions</div></div>
-    <div class="stat"><div class="num" id="statHearts">—</div><div class="lbl">Hearts</div></div>
-    <div class="stat"><div class="num" id="statWallets">—</div><div class="lbl">Unique</div></div>
+    <div class="stat"><div class="num" id="statPosts">—</div><span class="lbl">confessions</span></div>
+    <div class="stat"><div class="num" id="statHearts">—</div><span class="lbl">hearts</span></div>
+    <div class="stat"><div class="num" id="statWallets">—</div><span class="lbl">unique</span></div>
   </div>
 
   <div id="status" class="off">Connect Wallet</div>
 
-  <textarea id="input" placeholder="Write your confession... (keep it clean)" maxlength="500"></textarea>
-  <div class="char-count"><span id="charCount">0</span>/500</div>
-  <div class="actions">
-    <button class="btn-primary" id="btnPost" disabled>Post (0.001 BOT)</button>
-    <button class="btn-small" id="btnRefresh">Refresh</button>
+  <div class="compose-wrap">
+    <textarea id="input" placeholder="Write your confession..." maxlength="500"></textarea>
+    <div class="compose-foot">
+      <span class="char-count"><span id="charCount">0</span>/500</span>
+      <button id="btnPost" disabled>Post · 0.001 BOT</button>
+    </div>
   </div>
 
-  <div class="section-title">
-    <span>Confessions</span>
-    <span class="count-badge" id="totalBadge">0</span>
+  <div class="feed-head">
+    <h2>Confessions</h2>
+    <span class="count" id="totalBadge">0</span>
   </div>
-  <div id="list"><div class="loading">Loading confessions...</div></div>
+  <div id="list"><div class="loading">Loading...</div></div>
 
   <div class="footer">
-    <a href="https://scan.bohr.life/address/0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4" target="_blank" rel="noopener">Explorer ↗</a>
-    <a href="https://github.com/AtharFazli/BOTConfessions" target="_blank" rel="noopener">GitHub ↗</a>
-    <span>·</span>
-    <span>Anonymous · On-chain · Permanent</span>
+    <a href="https://scan.bohr.life/address/0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4" target="_blank" rel="noopener">explorer ↗</a>
+    <a href="https://github.com/AtharFazli/BOTConfessions" target="_blank" rel="noopener">github ↗</a>
+    <span>anonymous · on-chain · permanent</span>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/web3@1/dist/web3.min.js"></script>
 <script>
-// ponytail: compact ABI, only functions frontend uses
 const ABI = [
   {inputs:[{internalType:"string",name:"_message",type:"string"}],name:"postConfession",outputs:[],stateMutability:"payable",type:"function"},
   {inputs:[{internalType:"uint256",name:"_index",type:"uint256"}],name:"heart",outputs:[],stateMutability:"payable",type:"function"},
   {inputs:[],name:"getConfessions",outputs:[{components:[{internalType:"uint256",name:"id",type:"uint256"},{internalType:"string",name:"message",type:"string"},{internalType:"uint256",name:"hearts",type:"uint256"}],internalType:"struct BOTConfessions.Confession[]",name:"",type:"tuple[]"}],stateMutability:"view",type:"function"},
   {inputs:[],name:"getCount",outputs:[{internalType:"uint256",name:"",type:"uint256"}],stateMutability:"view",type:"function"},
-  {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"},
-  {anonymous:false,inputs:[{indexed:true,internalType:"uint256",name:"id",type:"uint256"},{indexed:true,internalType:"uint256",name:"arrayIndex",type:"uint256"}],name:"NewConfession",type:"event"},
-  {anonymous:false,inputs:[{indexed:true,internalType:"uint256",name:"arrayIndex",type:"uint256"},{indexed:true,internalType:"address",name:"from",type:"address"}],name:"HeartAdded",type:"event"}
+  {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"}
 ];
 const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4";
-
-let web3, account, contract, totalHearts = 0, uniqueWallets = new Set();
-
+let web3, account, contract;
 const $ = s => document.querySelector(s);
-const statusEl = $('#status');
-const inputEl = $('#input');
-const charCount = $('#charCount');
-const btnPost = $('#btnPost');
-const btnRefresh = $('#btnRefresh');
-const listEl = $('#list');
-const statPosts = $('#statPosts');
-const statHearts = $('#statHearts');
-const statWallets = $('#statWallets');
-const totalBadge = $('#totalBadge');
-
-const TESTNET_CHAIN = { id: 968, hex: '0x3c8', label: 'testnet' };
-const MAINNET_CHAIN = { id: 677, hex: '0x2a5', label: 'mainnet' };
+const statusEl = $('#status'), inputEl = $('#input'), charCount = $('#charCount');
+const btnPost = $('#btnPost'), listEl = $('#list'), totalBadge = $('#totalBadge');
+const statPosts = $('#statPosts'), statHearts = $('#statHearts'), statWallets = $('#statWallets');
+const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet'};
+const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet'};
 const CHAIN = TESTNET_CHAIN;
 
 inputEl.oninput = () => {
@@ -155,23 +142,12 @@ async function checkChain(skipSwitch) {
   statusEl.textContent = 'Switch to BOT Chain (ID ' + CHAIN.id + ')';
   btnPost.disabled = true;
   if (!skipSwitch) {
-    try {
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN.hex }] });
-    } catch (e) {
+    try { await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN.hex}]}); }
+    catch (e) {
       if (e.code === 4902) {
-        try {
-          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
-            chainId: CHAIN.hex, chainName: 'BOT Chain ' + CHAIN.label,
-            rpcUrls: ['https://rpc.bohr.life'],
-            nativeCurrency: { name: 'tBOT', symbol: 'tBOT', decimals: 18 },
-            blockExplorerUrls: ['https://scan.bohr.life']
-          }]});
-        } catch (e2) {
-          if (e2.code !== 4001) statusEl.textContent = 'Add manually: rpc.bohr.life, chain ID 968';
-        }
-      } else if (e.code !== 4001) {
-        statusEl.textContent = 'Switch manually to BOT Chain Testnet (ID 968)';
-      }
+        try { await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN.hex,chainName:'BOT Chain '+CHAIN.label,rpcUrls:['https://rpc.bohr.life'],nativeCurrency:{name:'tBOT',symbol:'tBOT',decimals:18},blockExplorerUrls:['https://scan.bohr.life']}]}); }
+        catch (e2) { if (e2.code !== 4001) statusEl.textContent = 'Add rpc.bohr.life, chain 968'; }
+      } else if (e.code !== 4001) statusEl.textContent = 'Switch to BOT Chain (ID 968)';
     }
   }
   return false;
@@ -181,9 +157,8 @@ async function init() {
   if (!window.ethereum) { statusEl.textContent = 'Install MetaMask or OKX Wallet'; return; }
   web3 = new Web3(window.ethereum);
   try {
-    let accounts = await window.ethereum.request({ method: 'eth_accounts' });
-    if (!accounts || accounts.length === 0)
-      accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    let accounts = await window.ethereum.request({method:'eth_accounts'});
+    if (!accounts || accounts.length === 0) accounts = await window.ethereum.request({method:'eth_requestAccounts'});
     if (!accounts || !accounts[0]) { statusEl.textContent = 'No accounts'; return; }
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
@@ -194,33 +169,23 @@ async function init() {
     statusEl.className = 'on';
     statusEl.textContent = 'BOT Chain · ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
-    loadStats();
-    loadList();
-    window.ethereum.on('accountsChanged', ([a]) => { if (a) { account = a; location.reload(); } });
-    window.ethereum.on('chainChanged', () => location.reload());
-  } catch(e) {
-    statusEl.textContent = e.code === 4001 ? 'Rejected' : (e.message || String(e)).slice(0,60);
-  }
+    loadStats(); loadList();
+    window.ethereum.on('accountsChanged',([a])=>{if(a){account=a;location.reload()}});
+    window.ethereum.on('chainChanged',()=>location.reload());
+  } catch(e) { statusEl.textContent = e.code === 4001 ? 'Rejected' : (e.message||String(e)).slice(0,60); }
 }
 
 btnPost.onclick = async () => {
   const msg = inputEl.value.trim();
   if (!msg || !contract) return;
-  btnPost.disabled = true;
-  btnPost.textContent = 'Sending...';
+  btnPost.disabled = true; btnPost.textContent = 'Sending...';
   try {
-    const gasPrice = await web3.eth.getGasPrice();
-    await contract.methods.postConfession(msg).send({
-      from: account, value: '1000000000000000', gasPrice
-    });
-    inputEl.value = '';
-    charCount.textContent = '0';
-    charCount.parentElement.className = 'char-count';
-    loadStats();
-    loadList();
-  } catch(e) { alert('Failed: ' + (e.message || e).slice(0,80)); }
-  btnPost.disabled = false;
-  btnPost.textContent = 'Post (0.001 BOT)';
+    const gp = await web3.eth.getGasPrice();
+    await contract.methods.postConfession(msg).send({from:account,value:'1000000000000000',gasPrice:gp});
+    inputEl.value = ''; charCount.textContent = '0'; charCount.parentElement.className = 'char-count';
+    loadStats(); loadList();
+  } catch(e) { alert('Failed: '+(e.message||e).slice(0,80)); }
+  btnPost.disabled = false; btnPost.textContent = 'Post · 0.001 BOT';
 };
 
 async function loadStats() {
@@ -234,56 +199,52 @@ async function loadStats() {
 
 async function loadList() {
   if (!contract) return;
-  listEl.innerHTML = '<div class="loading">Loading confessions...</div>';
+  listEl.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    const data = await contract.methods.getConfessions().call({maxPriorityFeePerGas:null});
+    const data = await contract.methods.getConfessions().call();
     if (data.length === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; return; }
-    totalHearts = 0;
-    let html = '';
+    let html = '', totalH = 0;
     for (let i = data.length - 1; i >= 0; i--) {
-      const c = data[i];
-      const idx = i;
-      totalHearts += Number(c.hearts);
-      // ponytail: track potential unique wallets from heart events — rough estimate
-      html += `
-        <div class="card" style="animation-delay:${(data.length-1-i)*40}ms">
-          <div class="msg">${esc(c.message)}</div>
-          <div class="meta">
-            <span class="anon">#${trunc(c.id.toString())}</span>
-            <div class="hearts">
-              <button class="heart-btn" data-idx="${idx}" onclick="heartify(${idx})">♥</button>
-              <span>${c.hearts}</span>
-            </div>
+      const c = data[i], idx = i;
+      totalH += Number(c.hearts);
+      html += `<div class="card" style="animation-delay:${(data.length-1-i)*40}ms">
+        <div class="msg">${esc(c.message)}</div>
+        <div class="meta">
+          <span class="anon">#${trunc(c.id.toString())}</span>
+          <div class="hearts">
+            <button class="heart-btn" data-idx="${idx}" onclick="heartify(${idx})">♥</button>
+            <span>${c.hearts}</span>
           </div>
-        </div>`;
+        </div>
+      </div>`;
     }
     listEl.innerHTML = html;
-    statHearts.textContent = totalHearts.toString();
-    // rough unique wallets estimate: just show count
+    statHearts.textContent = totalH.toString();
     if (account) {
       document.querySelectorAll('.heart-btn').forEach(async (btn) => {
-        const idx = parseInt(btn.dataset.idx);
         try {
-          const done = await contract.methods.hasHearted(idx, account).call();
-          if (done) { btn.disabled = true; btn.classList.add('hearted'); }
+          if (await contract.methods.hasHearted(parseInt(btn.dataset.idx), account).call()) {
+            btn.disabled = true; btn.classList.add('hearted');
+          }
         } catch(e) {}
       });
     }
-  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed. Check your connection.</div>'; }
+  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
 }
 
-async function heartify(idx) {
+function heartify(idx) {
   if (!contract) return;
-  try {
-    const gasPrice = await web3.eth.getGasPrice();
-    await contract.methods.heart(idx).send({ from: account, value: '1000000000000000', gasPrice });
-    loadList();
-  } catch(e) { alert('Failed: ' + (e.message || e).slice(0,80)); }
+  (async () => {
+    try {
+      const gp = await web3.eth.getGasPrice();
+      await contract.methods.heart(idx).send({from:account,value:'1000000000000000',gasPrice:gp});
+      loadList();
+    } catch(e) { alert('Failed: '+(e.message||e).slice(0,80)); }
+  })();
 }
-
-function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-function trunc(s) { return s.length > 40 ? s.slice(0,5)+'******'+s.slice(-5) : s; }
-btnRefresh.onclick = () => { loadStats(); loadList(); };
+function esc(s) {const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function trunc(s){return s.length>40?s.slice(0,5)+'******'+s.slice(-5):s;}
+btnPost.disabled = true;
 statusEl.onclick = init;
 init();
 </script>
