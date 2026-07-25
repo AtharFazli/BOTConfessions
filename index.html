@@ -49,10 +49,8 @@ textarea::placeholder{color:#55556a}
 .feed-head .count{font-size:.68rem;color:#55556a;background:#1a1a28;padding:3px 10px;border-radius:3px}
 #list{display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a40 transparent;padding-right:4px}
 .card{background:#12121a;border:1px solid #1a1a28;padding:16px;transition:all .15s;animation:cardIn .3s ease-out both}
-/* ponytail: alternating subtle tint instead of identical cards */
-.card:nth-child(even){border-left:2px solid #ff5c6c}
-.card:nth-child(odd){border-left:2px solid #c084fc}
-.card:hover{background:#16161f}
+.card:nth-child(even){background:#101018}
+.card:hover{background:#16161f;border-color:#2a2a40}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}}
 .card .msg{font-size:clamp(.85rem,3vw,.92rem);line-height:1.5;margin-bottom:10px;color:#ddddee;word-break:break-all}
