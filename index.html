@@ -100,6 +100,7 @@ const CHAIN = TESTNET_CHAIN;
 const POST_PRICE = '1000000000000000';
 const HEART_PRICE = '1000000000000000';
 const PAGE_SIZE = 50;
+const HAS_RANGE = false; // true abis deploy contract baru (mainnet) yg punya getConfessionsRange
 
 const RPC = CHAIN.rpc;
 let web3 = new Web3(RPC);
@@ -203,14 +204,20 @@ async function loadList(append) {
     } else {
       start = Math.max(0, total - PAGE_SIZE);
     }
-    const data = await contract.methods.getConfessionsRange(start, fetchCount).call();
-    if (data.length === 0) { if (!append) listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
-    // reverse so newest shows first
-    for (let i = data.length - 1; i >= 0; i--) {
-      const c = data[i];
+    // ponytail: HAS_RANGE=true -> getConfessionsRange, else fallback getConfessions + slice
+    let raw;
+    if (HAS_RANGE) {
+      raw = await contract.methods.getConfessionsRange(start, fetchCount).call();
+    } else {
+      raw = await contract.methods.getConfessions().call();
+      raw = raw.slice(start, start + fetchCount);
+    }
+    if (raw.length === 0) { if (!append) listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
+    for (let i = raw.length - 1; i >= 0; i--) {
+      const c = raw[i];
       const idx = start + i;
       totalH += Number(c.hearts);
-      html += `<div class="card" style="animation-delay:${(data.length-1-i)*40}ms">
+      html += `<div class="card" style="animation-delay:${(raw.length-1-i)*40}ms">
         <div class="msg">${esc(c.message)}</div>
         <div class="meta">
           <span class="anon">#${trunc(c.id.toString())}</span>
