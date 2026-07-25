@@ -53,7 +53,7 @@ textarea::placeholder{color:#55556a}
 .card:hover{background:#16161f;border-color:#2a2a40}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}}
-.card .msg{font-size:clamp(.85rem,3vw,.92rem);line-height:1.5;margin-bottom:10px;color:#ddddee;word-break:break-all}
+.card .msg{font-size:clamp(.85rem,3vw,.92rem);line-height:1.5;margin-bottom:10px;color:#ddddee;overflow-wrap:break-word;word-break:break-word}
 .card .meta{display:flex;justify-content:space-between;align-items:center}
 .card .anon{font-size:.62rem;color:#55556a;font-family:monospace;letter-spacing:.2px}
 .hearts{display:flex;align-items:center;gap:4px}
@@ -64,6 +64,8 @@ textarea::placeholder{color:#55556a}
 .hearts span{font-size:.82rem;color:#9999b0;min-width:1.2em;text-align:center}
 .empty{text-align:center;color:#55556a;padding:48px 0;font-size:.85rem}
 .loading{text-align:center;color:#55556a;padding:24px 0;font-size:.8rem}
+.btn-load-more{display:block;width:100%;padding:12px;margin-top:8px;border:1px solid #2a2a40;border-radius:6px;background:#12121a;color:#8888b0;font-size:.8rem;cursor:pointer;transition:all .12s}
+.btn-load-more:hover{background:#1a1a28;border-color:#ff5c6c;color:#ff5c6c}
 
 /* footer */
 .footer{border-top:1px solid #1a1a28;margin-top:32px;padding:20px 0 40px;font-size:.7rem;color:#444460;display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}
@@ -74,7 +76,7 @@ textarea::placeholder{color:#55556a}
 <body>
 <div class="container">
   <div class="hero">
-    <div class="labels"><span>anon</span><span>on-chain</span><span>BOT</span></div>
+    <span class="labels"><span>anon</span><span>on-chain</span><span>${CHAIN.symbol}</span></span>
     <h1>BOTConfessions</h1>
     <p class="tagline">Post what you can't say. No login, no names, just the chain.</p>
   </div>
@@ -90,7 +92,7 @@ textarea::placeholder{color:#55556a}
     <textarea id="input" placeholder="Write your confession..." maxlength="500"></textarea>
     <div class="compose-foot">
       <span class="char-count"><span id="charCount">0</span>/500</span>
-      <button id="btnPost" disabled>Post · 0.001 BOT</button>
+      <button id="btnPost" disabled>Post · 0.001 ${CHAIN.symbol}</button>
     </div>
   </div>
 
@@ -101,7 +103,7 @@ textarea::placeholder{color:#55556a}
   <div id="list"><div class="loading">Loading...</div></div>
 
   <div class="footer">
-    <a href="https://scan.bohr.life/address/0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4" target="_blank" rel="noopener">explorer ↗</a>
+    <a href="${CHAIN.explorer}/address/${CONTRACT}" target="_blank" rel="noopener">explorer ↗</a>
     <a href="https://github.com/AtharFazli/BOTConfessions" target="_blank" rel="noopener">github ↗</a>
     <span>anonymous · on-chain · permanent</span>
   </div>
@@ -122,12 +124,15 @@ const $ = s => document.querySelector(s);
 const statusEl = $('#status'), inputEl = $('#input'), charCount = $('#charCount');
 const btnPost = $('#btnPost'), listEl = $('#list'), totalBadge = $('#totalBadge');
 const statPosts = $('#statPosts'), statHearts = $('#statHearts');
-const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet'};
-const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet'};
+const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet',rpc:'https://rpc.bohr.life',explorer:'https://scan.bohr.life',symbol:'tBOT',name:'BOT Chain Testnet'};
+const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet',rpc:'https://rpc.botchain.ai',explorer:'https://scan.botchain.ai',symbol:'BOT',name:'BOT Chain'};
 const CHAIN = TESTNET_CHAIN;
+const POST_PRICE = '1000000000000000'; // 0.001 ether
+const HEART_PRICE = '1000000000000000';
+const PAGE_SIZE = 50;
 
 // ponytail: public RPC so anyone can read confessions without wallet
-const RPC = 'https://rpc.bohr.life';
+const RPC = CHAIN.rpc;
 let web3 = new Web3(RPC);
 let contract = new web3.eth.Contract(ABI, CONTRACT);
 let account;
@@ -144,15 +149,15 @@ async function checkChain(skipSwitch) {
   const id = await web3.eth.getChainId();
   if (String(id) === String(CHAIN.id) || String(id) === CHAIN.hex) return true;
   statusEl.className = 'off';
-  statusEl.textContent = 'Switch to BOT Chain (ID ' + CHAIN.id + ')';
+  statusEl.textContent = 'Switch to ' + CHAIN.name + ' (ID ' + CHAIN.id + ')';
   btnPost.disabled = true;
   if (!skipSwitch) {
     try { await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN.hex}]}); }
     catch (e) {
       if (e.code === 4902) {
-        try { await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN.hex,chainName:'BOT Chain '+CHAIN.label,rpcUrls:['https://rpc.bohr.life'],nativeCurrency:{name:'tBOT',symbol:'tBOT',decimals:18},blockExplorerUrls:['https://scan.bohr.life']}]}); }
-        catch (e2) { if (e2.code !== 4001) statusEl.textContent = 'Add rpc.bohr.life, chain 968'; }
-      } else if (e.code !== 4001) statusEl.textContent = 'Switch to BOT Chain (ID 968)';
+        try { await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN.hex,chainName:CHAIN.name,rpcUrls:[CHAIN.rpc],nativeCurrency:{name:CHAIN.symbol,symbol:CHAIN.symbol,decimals:18},blockExplorerUrls:[CHAIN.explorer]}]}); }
+        catch (e2) { if (e2.code !== 4001) statusEl.textContent = 'Add ' + CHAIN.rpc + ', chain ' + CHAIN.id; }
+      } else if (e.code !== 4001) statusEl.textContent = 'Switch to ' + CHAIN.name + ' (ID ' + CHAIN.id + ')';
     }
   }
   return false;
@@ -172,7 +177,7 @@ async function init() {
       if (!await checkChain(true)) return;
     }
     statusEl.className = 'on';
-    statusEl.textContent = 'BOT Chain · ' + account.slice(0,6) + '...' + account.slice(-4);
+    statusEl.textContent = CHAIN.name + ' · ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
     loadStats(); loadList();
     window.ethereum.on('accountsChanged',([a])=>{if(a){account=a;location.reload()}});
@@ -182,16 +187,16 @@ async function init() {
 
 btnPost.onclick = async () => {
   const msg = inputEl.value.trim();
-  if (!msg || !contract) return;
+  if (!msg || !contract || !account) return;
   btnPost.disabled = true; btnPost.textContent = 'Sending...';
   try {
     const gp = await web3.eth.getGasPrice();
-    await contract.methods.postConfession(msg).send({from:account,value:'1000000000000000',gasPrice:gp});
+    await contract.methods.postConfession(msg).send({from:account,value:POST_PRICE,gasPrice:gp});
     inputEl.value = ''; charCount.textContent = '0'; charCount.parentElement.className = 'char-count';
     loadStats(); loadList();
     Swal.fire({icon:'success',title:'Posted!',text:'Confession on-chain.',timer:2000,showConfirmButton:false,background:'#12121a',color:'#eee',iconColor:'#ff5c6c'});
   } catch(e) { Swal.fire({icon:'error',title:'Failed',text:(e.message||e).slice(0,80),background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}); }
-  btnPost.disabled = false; btnPost.textContent = 'Post · 0.001 BOT';
+  btnPost.disabled = false; btnPost.textContent = 'Post · 0.001 ' + CHAIN.symbol;
 };
 
 async function loadStats() {
@@ -203,15 +208,25 @@ async function loadStats() {
   } catch(e) {}
 }
 
-async function loadList() {
+async function loadList(append) {
   if (!contract) return;
-  listEl.innerHTML = '<div class="loading">Loading...</div>';
+  if (!append) listEl.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    const data = await contract.methods.getConfessions().call();
+    const total = Number(await contract.methods.getCount().call());
+    if (total === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; return; }
+    let start = 0, html = '', totalH = 0;
+    if (append) {
+      start = Math.max(0, total - listEl.querySelectorAll('.card').length - PAGE_SIZE);
+      if (start < 0) start = 0;
+    } else {
+      // ponytail: load last PAGE_SIZE confessions from the end
+      start = Math.max(0, total - PAGE_SIZE);
+    }
+    const data = await contract.methods.getConfessionsRange(start, PAGE_SIZE).call();
     if (data.length === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; return; }
-    let html = '', totalH = 0;
     for (let i = data.length - 1; i >= 0; i--) {
-      const c = data[i], idx = i;
+      const c = data[i];
+      const idx = start + i;
       totalH += Number(c.hearts);
       html += `<div class="card" style="animation-delay:${(data.length-1-i)*40}ms">
         <div class="msg">${esc(c.message)}</div>
@@ -224,10 +239,25 @@ async function loadList() {
         </div>
       </div>`;
     }
-    listEl.innerHTML = html;
+    if (append) {
+      // ponytail: append older batch AFTER existing (bottom), newest first within batch
+      listEl.innerHTML = listEl.innerHTML + html;
+    } else {
+      listEl.innerHTML = html;
+    }
+    // show load more button if there are older confessions
+    if (start > 0) {
+      const btn = document.createElement('button');
+      btn.className = 'btn-load-more';
+      btn.textContent = 'Load more';
+      btn.onclick = () => loadList(true);
+      listEl.appendChild(btn);
+    }
     statHearts.textContent = totalH.toString();
+    totalBadge.textContent = total.toString();
     if (account) {
-      document.querySelectorAll('.heart-btn').forEach(async (btn) => {
+      document.querySelectorAll('.heart-btn:not([data-checked])').forEach(async (btn) => {
+        btn.dataset.checked = '1';
         try {
           if (await contract.methods.hasHearted(parseInt(btn.dataset.idx), account).call()) {
             btn.disabled = true; btn.classList.add('hearted');
@@ -237,7 +267,6 @@ async function loadList() {
     }
   } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
 }
-
 function heartify(idx) {
   if (!account) {
     Swal.fire({icon:'info',title:'Connect Wallet',text:'Connect wallet to send a heart.',showCancelButton:true,confirmButtonColor:'#ff5c6c',cancelButtonColor:'#333',background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}).then(r=>{if(r.isConfirmed) init()});
@@ -246,7 +275,7 @@ function heartify(idx) {
   (async () => {
     try {
       const gp = await web3.eth.getGasPrice();
-      await contract.methods.heart(idx).send({from:account,value:'1000000000000000',gasPrice:gp});
+      await contract.methods.heart(idx).send({from:account,value:HEART_PRICE,gasPrice:gp});
       loadList();
       Swal.fire({icon:'success',title:'Heart sent!',timer:1500,showConfirmButton:false,background:'#12121a',color:'#eee',iconColor:'#ff5c6c'});
     } catch(e) { Swal.fire({icon:'error',title:'Failed',text:(e.message||e).slice(0,80),background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}); }
