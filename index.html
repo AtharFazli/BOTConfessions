@@ -115,7 +115,7 @@ textarea::placeholder{color:#55556a}
 const ABI = [
   {inputs:[{internalType:"string",name:"_message",type:"string"}],name:"postConfession",outputs:[],stateMutability:"payable",type:"function"},
   {inputs:[{internalType:"uint256",name:"_index",type:"uint256"}],name:"heart",outputs:[],stateMutability:"payable",type:"function"},
-  {inputs:[],name:"getConfessions",outputs:[{components:[{internalType:"uint256",name:"id",type:"uint256"},{internalType:"string",name:"message",type:"string"},{internalType:"uint256",name:"hearts",type:"uint256"}],internalType:"struct BOTConfessions.Confession[]",name:"",type:"tuple[]"}],stateMutability:"view",type:"function"},
+  {inputs:[{internalType:"uint256",name:"start",type:"uint256"},{internalType:"uint256",name:"count",type:"uint256"}],name:"getConfessionsRange",outputs:[{components:[{internalType:"uint256",name:"id",type:"uint256"},{internalType:"string",name:"message",type:"string"},{internalType:"uint256",name:"hearts",type:"uint256"}],internalType:"struct BOTConfessions.Confession[]",name:"",type:"tuple[]"}],stateMutability:"view",type:"function"},
   {inputs:[],name:"getCount",outputs:[{internalType:"uint256",name:"",type:"uint256"}],stateMutability:"view",type:"function"},
   {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"}
 ];
