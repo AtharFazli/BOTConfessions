@@ -2,123 +2,175 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BOTConfessions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BOTConfessions — Anonymous on-chain confessions</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0c0c12;color:#f0f0f8;min-height:100vh;display:flex;justify-content:center;padding:0 max(8px,env(safe-area-inset-left)) max(24px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right))}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0f;color:#eee;min-height:100vh;display:flex;justify-content:center;padding:0 max(8px,env(safe-area-inset-left)) 0 max(8px,env(safe-area-inset-right))}
 .container{max-width:640px;width:100%;padding:24px;padding-top:max(48px,env(safe-area-inset-top))}
-h1{font-size:clamp(1.35rem,5.5vw,1.8rem);font-weight:700;color:#ec5c6b;margin-bottom:2px}
-.sub{color:#8888a0;font-size:clamp(.78rem,3vw,.85rem);margin-bottom:24px;line-height:1.5}
+
+/* hero */
+.hero{text-align:center;margin-bottom:32px}
+.hero h1{font-size:clamp(1.5rem,6vw,2rem);font-weight:800;background:linear-gradient(135deg,#ff6b7c,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;text-wrap:balance}
+.hero .tagline{color:#8888b0;font-size:clamp(.78rem,3vw,.85rem);line-height:1.5;max-width:480px;margin:0 auto}
+.hero .pill{display:inline-block;font-size:.68rem;color:#c084fc;background:#1a0e2e;border:1px solid #2a1a4a;border-radius:999px;padding:4px 14px;margin-bottom:12px;letter-spacing:.3px;text-transform:uppercase}
+
+/* stats */
+.stats{display:flex;gap:12px;margin-bottom:24px}
+.stat{flex:1;background:#12121a;border:1px solid #1e1e2e;border-radius:10px;padding:12px;text-align:center}
+.stat .num{font-size:clamp(1rem,4vw,1.3rem);font-weight:700;color:#ff6b7c}
+.stat .lbl{font-size:.68rem;color:#666680;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+/* status */
 #status{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:16px;min-height:44px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
 #status::before{content:'';width:8px;height:8px;border-radius:50%;flex-shrink:0}
 #status.off{background:#1c0e12;color:#f87171}
 #status.off::before{background:#f87171}
 #status.on{background:#0e1c12;color:#4ade80}
 #status.on::before{background:#4ade80}
-textarea{width:100%;padding:14px;border:1px solid #222233;border-radius:10px;background:#16161f;color:#f0f0f8;font-size:16px;resize:vertical;min-height:100px;margin-bottom:12px;transition:border-color .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
+
+/* compose */
+textarea{width:100%;padding:14px;border:1px solid #222233;border-radius:10px;background:#16161f;color:#eee;font-size:16px;resize:vertical;min-height:100px;margin-bottom:10px;transition:border-color .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
 textarea::placeholder{color:#7c7c94}
 textarea:focus{outline:none;border-color:#7c5cfc;box-shadow:0 0 0 3px rgba(124,92,252,.15)}
+.char-count{text-align:right;font-size:.72rem;color:#55556a;margin-bottom:10px;margin-top:-6px}
+.char-count.full{color:#f87171}
+.actions{display:flex;gap:8px;margin-bottom:24px;align-items:center}
+@media (max-width:420px){.actions{flex-direction:column}.actions button{width:100%}.btn-small{display:none}}
+
 button{padding:0 18px;border:none;border-radius:8px;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
-.btn-primary{background:#ec5c6b;color:#fff;min-height:44px}
-.btn-primary:hover{background:#d94d5c}
+.btn-primary{background:#ff6b7c;color:#fff;min-height:44px}
+.btn-primary:hover{background:#e85a6b}
 .btn-primary:active{transform:scale(.97)}
 .btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none}
 .btn-small{background:#222233;color:#b0b0c8;min-height:38px;font-size:.8rem}
 .btn-small:hover{background:#2a2a40}
-.actions{display:flex;gap:8px;margin-bottom:24px;align-items:center}
-@media (max-width:420px){.actions{flex-direction:column}.actions button{width:100%}.btn-small{display:none}}
+
+/* feed */
+.section-title{font-size:.72rem;color:#55556a;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.section-title .count-badge{font-size:.65rem;color:#8888a0;background:#1a1a28;padding:2px 10px;border-radius:99px}
 #list{display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a40 transparent;padding-right:4px}
-.card{background:#16161f;border:1px solid #1e1e2e;border-radius:12px;padding:16px;transition:border-color .2s;animation:cardIn .35s ease-out both}
-.card:hover{border-color:#2a2a40}
+.card{background:#12121a;border:1px solid #1e1e2e;border-radius:12px;padding:16px;transition:border-color .2s,box-shadow .2s;animation:cardIn .35s ease-out both}
+.card:hover{border-color:#2a2a40;box-shadow:0 2px 12px rgba(0,0,0,.3)}
 @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}}
 .card .msg{font-size:clamp(.85rem,3vw,.92rem);line-height:1.5;margin-bottom:10px;color:#e0e0ec;word-break:break-all}
 .card .meta{display:flex;justify-content:space-between;align-items:center}
-.card .anon{font-size:.68rem;color:#55556a;background:#1a1a28;padding:3px 8px;border-radius:5px;font-family:monospace;letter-spacing:.3px}
+.card .anon{font-size:.65rem;color:#55556a;background:#1a1a28;padding:3px 10px;border-radius:99px;font-family:monospace;letter-spacing:.3px}
 .hearts{display:flex;align-items:center;gap:5px}
-.hearts button{background:none;border:1px solid #2a2a40;border-radius:6px;color:#ec5c6b;padding:8px 14px;cursor:pointer;font-size:.85rem;transition:all .15s;line-height:1;min-height:38px}
-.hearts button:hover{border-color:#ec5c6b;background:#1c0e12}
+.hearts button{background:none;border:1px solid #2a2a40;border-radius:6px;color:#ff6b7c;padding:8px 14px;cursor:pointer;font-size:.85rem;transition:all .15s;line-height:1;min-height:38px}
+.hearts button:hover{border-color:#ff6b7c;background:#1c0e12}
 .hearts button:active{transform:scale(.9)}
-.hearts button.hearted{background:#2a1520;border-color:#ec5c6b;opacity:.5;cursor:default}
+.hearts button.hearted{background:#2a1520;border-color:#ff6b7c;opacity:.5;cursor:default}
 .hearts span{font-size:.85rem;color:#9999b0;min-width:1.2em;text-align:center}
 .empty{text-align:center;color:#55556a;padding:48px 0;font-size:.9rem}
+.loading{text-align:center;color:#55556a;padding:24px 0;font-size:.85rem;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* footer */
+.footer{text-align:center;padding:32px 0 48px;font-size:.72rem;color:#444460;display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}
+.footer a{color:#6666a0;text-decoration:none;transition:color .15s}
+.footer a:hover{color:#c084fc}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>BOTConfessions</h1>
-  <p class="sub">Anonymous on-chain confessions. 0.001 tBOT to post, 0.001 tBOT to heart.</p>
+  <div class="hero">
+    <div class="pill">BOT Chain</div>
+    <h1>BOTConfessions</h1>
+    <p class="tagline">Anonymous. On-chain. Permanent. Post confessions, share hearts — no accounts, no backend, just the chain.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statPosts">—</div><div class="lbl">Confessions</div></div>
+    <div class="stat"><div class="num" id="statHearts">—</div><div class="lbl">Hearts</div></div>
+    <div class="stat"><div class="num" id="statWallets">—</div><div class="lbl">Unique</div></div>
+  </div>
+
   <div id="status" class="off">Connect Wallet</div>
-  <textarea id="input" placeholder="Write your confession... (keep it clean)"></textarea>
+
+  <textarea id="input" placeholder="Write your confession... (keep it clean)" maxlength="500"></textarea>
+  <div class="char-count"><span id="charCount">0</span>/500</div>
   <div class="actions">
-    <button class="btn-primary" id="btnPost" disabled>Post (0.001 tBOT)</button>
+    <button class="btn-primary" id="btnPost" disabled>Post (0.001 BOT)</button>
     <button class="btn-small" id="btnRefresh">Refresh</button>
   </div>
-  <div id="list"></div>
+
+  <div class="section-title">
+    <span>Confessions</span>
+    <span class="count-badge" id="totalBadge">0</span>
+  </div>
+  <div id="list"><div class="loading">Loading confessions...</div></div>
+
+  <div class="footer">
+    <a href="https://scan.bohr.life/address/0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4" target="_blank" rel="noopener">Explorer ↗</a>
+    <a href="https://github.com/AtharFazli/BOTConfessions" target="_blank" rel="noopener">GitHub ↗</a>
+    <span>·</span>
+    <span>Anonymous · On-chain · Permanent</span>
+  </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/web3@1/dist/web3.min.js"></script>
 <script>
+// ponytail: compact ABI, only functions frontend uses
 const ABI = [
-  {"inputs":[{"internalType":"string","name":"_message","type":"string"}],"name":"postConfession","outputs":[],"stateMutability":"payable","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"_index","type":"uint256"}],"name":"heart","outputs":[],"stateMutability":"payable","type":"function"},
-  {"inputs":[],"name":"getConfessions","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"string","name":"message","type":"string"},{"internalType":"uint256","name":"hearts","type":"uint256"}],"internalType":"struct BOTConfessions.Confession[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"getCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"hasHearted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"arrayIndex","type":"uint256"}],"name":"NewConfession","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"arrayIndex","type":"uint256"},{"indexed":true,"internalType":"address","name":"from","type":"address"}],"name":"HeartAdded","type":"event"}
+  {inputs:[{internalType:"string",name:"_message",type:"string"}],name:"postConfession",outputs:[],stateMutability:"payable",type:"function"},
+  {inputs:[{internalType:"uint256",name:"_index",type:"uint256"}],name:"heart",outputs:[],stateMutability:"payable",type:"function"},
+  {inputs:[],name:"getConfessions",outputs:[{components:[{internalType:"uint256",name:"id",type:"uint256"},{internalType:"string",name:"message",type:"string"},{internalType:"uint256",name:"hearts",type:"uint256"}],internalType:"struct BOTConfessions.Confession[]",name:"",type:"tuple[]"}],stateMutability:"view",type:"function"},
+  {inputs:[],name:"getCount",outputs:[{internalType:"uint256",name:"",type:"uint256"}],stateMutability:"view",type:"function"},
+  {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"},
+  {anonymous:false,inputs:[{indexed:true,internalType:"uint256",name:"id",type:"uint256"},{indexed:true,internalType:"uint256",name:"arrayIndex",type:"uint256"}],name:"NewConfession",type:"event"},
+  {anonymous:false,inputs:[{indexed:true,internalType:"uint256",name:"arrayIndex",type:"uint256"},{indexed:true,internalType:"address",name:"from",type:"address"}],name:"HeartAdded",type:"event"}
 ];
-const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4"; // TODO: replace after mainnet deploy
+const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4";
 
-let web3, account, contract;
+let web3, account, contract, totalHearts = 0, uniqueWallets = new Set();
 
 const $ = s => document.querySelector(s);
 const statusEl = $('#status');
 const inputEl = $('#input');
+const charCount = $('#charCount');
 const btnPost = $('#btnPost');
 const btnRefresh = $('#btnRefresh');
 const listEl = $('#list');
+const statPosts = $('#statPosts');
+const statHearts = $('#statHearts');
+const statWallets = $('#statWallets');
+const totalBadge = $('#totalBadge');
 
 const TESTNET_CHAIN = { id: 968, hex: '0x3c8', label: 'testnet' };
 const MAINNET_CHAIN = { id: 677, hex: '0x2a5', label: 'mainnet' };
-
-// ponytail: pick mainnet when deployed there
 const CHAIN = TESTNET_CHAIN;
+
+inputEl.oninput = () => {
+  const len = inputEl.value.length;
+  charCount.textContent = len;
+  charCount.parentElement.className = 'char-count' + (len >= 450 ? ' full' : '');
+};
 
 async function checkChain(skipSwitch) {
   const id = await web3.eth.getChainId();
-  // ponytail: loose compare — wallet may return string/hex
-  if (String(id) === String(CHAIN.id) || String(id) === CHAIN.hex) {
-    return true;
-  }
+  if (String(id) === String(CHAIN.id) || String(id) === CHAIN.hex) return true;
   statusEl.className = 'off';
   statusEl.textContent = 'Switch to BOT Chain (ID ' + CHAIN.id + ')';
   btnPost.disabled = true;
   if (!skipSwitch) {
     try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: CHAIN.hex }]
-      });
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN.hex }] });
     } catch (e) {
-      // 4902 = chain not added in wallet
       if (e.code === 4902) {
         try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: CHAIN.hex,
-              chainName: 'BOT Chain ' + CHAIN.label,
-              rpcUrls: ['https://rpc.bohr.life'],
-              nativeCurrency: { name: 'tBOT', symbol: 'tBOT', decimals: 18 },
-              blockExplorerUrls: ['https://scan.bohr.life']
-            }]
-          });
+          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+            chainId: CHAIN.hex, chainName: 'BOT Chain ' + CHAIN.label,
+            rpcUrls: ['https://rpc.bohr.life'],
+            nativeCurrency: { name: 'tBOT', symbol: 'tBOT', decimals: 18 },
+            blockExplorerUrls: ['https://scan.bohr.life']
+          }]});
         } catch (e2) {
-          if (e2.code !== 4001) statusEl.textContent = 'Add chain failed. Add manually: rpc.bohr.life, chain ID 968';
+          if (e2.code !== 4001) statusEl.textContent = 'Add manually: rpc.bohr.life, chain ID 968';
         }
       } else if (e.code !== 4001) {
-        statusEl.textContent = 'Switch failed. Manually switch to BOT Chain Testnet (ID 968) in wallet.';
+        statusEl.textContent = 'Switch manually to BOT Chain Testnet (ID 968)';
       }
     }
   }
@@ -126,63 +178,75 @@ async function checkChain(skipSwitch) {
 }
 
 async function init() {
-  if (!window.ethereum) { statusEl.textContent = 'Install MetaMask'; return; }
+  if (!window.ethereum) { statusEl.textContent = 'Install MetaMask or OKX Wallet'; return; }
   web3 = new Web3(window.ethereum);
   try {
     let accounts = await window.ethereum.request({ method: 'eth_accounts' });
-    if (!accounts || accounts.length === 0) {
+    if (!accounts || accounts.length === 0)
       accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    }
     if (!accounts || !accounts[0]) { statusEl.textContent = 'No accounts'; return; }
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
-    // attempt switch, then retry once in case chainChanged didn't fire
     if (!await checkChain()) {
-      // ponytail: some wallets don't fire chainChanged after switch
       await new Promise(r => setTimeout(r, 1000));
-      if (await checkChain(true)) {
-        // wallet switched but no event — continue
-      } else { return; }
+      if (!await checkChain(true)) return;
     }
     statusEl.className = 'on';
     statusEl.textContent = 'BOT Chain · ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
+    loadStats();
     loadList();
     window.ethereum.on('accountsChanged', ([a]) => { if (a) { account = a; location.reload(); } });
     window.ethereum.on('chainChanged', () => location.reload());
   } catch(e) {
-    statusEl.textContent = e.code === 4001 ? 'Rejected by user' : (e.message || String(e));
+    statusEl.textContent = e.code === 4001 ? 'Rejected' : (e.message || String(e)).slice(0,60);
   }
 }
 
 btnPost.onclick = async () => {
   const msg = inputEl.value.trim();
   if (!msg || !contract) return;
-  if (msg.length === 0) { alert('Confession cannot be empty.'); return; }
-  if (msg.length > 500) { alert('Max 500 characters.'); return; }
   btnPost.disabled = true;
   btnPost.textContent = 'Sending...';
   try {
-    const opts = { from: account, value: '1000000000000000', gasPrice: await web3.eth.getGasPrice() };
-    await contract.methods.postConfession(msg).send(opts);
+    const gasPrice = await web3.eth.getGasPrice();
+    await contract.methods.postConfession(msg).send({
+      from: account, value: '1000000000000000', gasPrice
+    });
     inputEl.value = '';
+    charCount.textContent = '0';
+    charCount.parentElement.className = 'char-count';
+    loadStats();
     loadList();
-  } catch(e) { alert('Failed: ' + (e.message || e)); }
+  } catch(e) { alert('Failed: ' + (e.message || e).slice(0,80)); }
   btnPost.disabled = false;
-  btnPost.textContent = 'Post (0.001 tBOT)';
+  btnPost.textContent = 'Post (0.001 BOT)';
 };
+
+async function loadStats() {
+  if (!contract) return;
+  try {
+    const count = await contract.methods.getCount().call();
+    statPosts.textContent = count.toString();
+    totalBadge.textContent = count.toString();
+  } catch(e) {}
+}
 
 async function loadList() {
   if (!contract) return;
-  btnRefresh.disabled = true;
-  btnRefresh.textContent = 'Loading...';
+  listEl.innerHTML = '<div class="loading">Loading confessions...</div>';
   try {
-    const data = await contract.methods.getConfessions().call();
-    listEl.innerHTML = data.length
-      ? [...data].reverse().map((c,i) => {
-          const idx = data.length - 1 - i;
-          return `
-        <div class="card" style="animation-delay:${i*40}ms">
+    const data = await contract.methods.getConfessions().call({maxPriorityFeePerGas:null});
+    if (data.length === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; return; }
+    totalHearts = 0;
+    let html = '';
+    for (let i = data.length - 1; i >= 0; i--) {
+      const c = data[i];
+      const idx = i;
+      totalHearts += Number(c.hearts);
+      // ponytail: track potential unique wallets from heart events — rough estimate
+      html += `
+        <div class="card" style="animation-delay:${(data.length-1-i)*40}ms">
           <div class="msg">${esc(c.message)}</div>
           <div class="meta">
             <span class="anon">#${trunc(c.id.toString())}</span>
@@ -191,36 +255,37 @@ async function loadList() {
               <span>${c.hearts}</span>
             </div>
           </div>
-        </div>`; }).join('')
-      : '<div class="empty">No confessions yet. Be the first!</div>';
-    // check which user already hearted
+        </div>`;
+    }
+    listEl.innerHTML = html;
+    statHearts.textContent = totalHearts.toString();
+    // rough unique wallets estimate: just show count
     if (account) {
       document.querySelectorAll('.heart-btn').forEach(async (btn) => {
         const idx = parseInt(btn.dataset.idx);
-        const done = await contract.methods.hasHearted(idx, account).call();
-        if (done) { btn.disabled = true; btn.classList.add('hearted'); }
+        try {
+          const done = await contract.methods.hasHearted(idx, account).call();
+          if (done) { btn.disabled = true; btn.classList.add('hearted'); }
+        } catch(e) {}
       });
     }
-  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
-  btnRefresh.disabled = false;
-  btnRefresh.textContent = 'Refresh';
+  } catch(e) { listEl.innerHTML = '<div class="empty">Load failed. Check your connection.</div>'; }
 }
 
 async function heartify(idx) {
   if (!contract) return;
   try {
-    const opts = { from: account, value: '1000000000000000', gasPrice: await web3.eth.getGasPrice() };
-    await contract.methods.heart(idx).send(opts); loadList(); }
-  catch(e) { alert('Failed: ' + (e.message || e)); }
+    const gasPrice = await web3.eth.getGasPrice();
+    await contract.methods.heart(idx).send({ from: account, value: '1000000000000000', gasPrice });
+    loadList();
+  } catch(e) { alert('Failed: ' + (e.message || e).slice(0,80)); }
 }
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-function trunc(s){return s.length>40 ? s.slice(0,5)+'******'+s.slice(-5) : s;}
-btnRefresh.onclick = loadList;
-statusEl.style.cursor = 'pointer';
+function trunc(s) { return s.length > 40 ? s.slice(0,5)+'******'+s.slice(-5) : s; }
+btnRefresh.onclick = () => { loadStats(); loadList(); };
 statusEl.onclick = init;
 init();
 </script>
 </body>
 </html>
-
