@@ -223,13 +223,23 @@ async function loadList(append) {
     if (total === 0) { listEl.innerHTML = '<div class="empty">No confessions yet. Be the first!</div>'; loadingList = false; return; }
     let start, fetchCount = PAGE_SIZE, html = '', totalH = 0;
     if (append) {
-      const loaded = listEl.querySelectorAll('.card').length;
-      const remaining = total - loaded;
-      if (remaining <= 0) { loadingList = false; return; }
-      fetchCount = Math.min(PAGE_SIZE, remaining);
-      start = Math.max(0, total - loaded - fetchCount);
-      // sum existing heart counts from DOM
-      document.querySelectorAll('.card .hearts span').forEach(s => totalH += Number(s.textContent));
+      // paginate by existing DOM indices — no overlap even with external growth
+      const btns = document.querySelectorAll('.heart-btn');
+      if (btns.length === 0) {
+        start = Math.max(0, total - PAGE_SIZE);
+      } else {
+        let minIdx = Infinity, maxIdx = -1;
+        btns.forEach(b => { const i = parseInt(b.dataset.idx); if (i < minIdx) minIdx = i; if (i > maxIdx) maxIdx = i; });
+        document.querySelectorAll('.card .hearts span').forEach(s => totalH += Number(s.textContent));
+        // ponytail: load older only (below minIdx). Newer confessions above maxIdx
+        // appear on full reload — appending them below would break newest-first order.
+        if (minIdx > 0) {
+          fetchCount = Math.min(PAGE_SIZE, minIdx);
+          start = minIdx - fetchCount;
+        } else {
+          loadingList = false; return;
+        }
+      }
     } else {
       start = Math.max(0, total - PAGE_SIZE);
     }
@@ -292,7 +302,10 @@ function heartify(idx) {
       if (card) {
         card.disabled = true; card.classList.add('hearted');
         const span = card.nextElementSibling;
-        if (span) span.textContent = String(parseInt(span.textContent) + 1);
+        if (span) {
+          span.textContent = String(parseInt(span.textContent) + 1);
+          statHearts.textContent = String(parseInt(statHearts.textContent) + 1);
+        }
       }
       Swal.fire({icon:'success',title:'Heart sent!',timer:1500,showConfirmButton:false,background:'#12121a',color:'#eee',iconColor:'#ff5c6c'});
     } catch(e) { Swal.fire({icon:'error',title:'Failed',text:(e.message||e).slice(0,80),background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}); }
