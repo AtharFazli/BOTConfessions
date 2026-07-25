@@ -9,7 +9,7 @@ Anonymous on-chain confession board for BOTChain. Built for **GMT Build Week Hac
 - All data on-chain, immutable
 - Connect MetaMask, no backend needed
 
-## Step-by-Step Deployment
+|## Step-by-Step Deployment
 
 ### 1. MetaMask Setup
 - Add network: **BOT Chain Testnet**
@@ -21,29 +21,20 @@ Anonymous on-chain confession board for BOTChain. Built for **GMT Build Week Hac
 ### 2. Get Test Tokens
 - Ask organizer or BOT Chain Discord faucet for free tBOT (testnet, no real value)
 
-### 3. Deploy Contract
-- Go to [remix.ethereum.org](https://remix.ethereum.org)
-- Open `BOTConfessions.sol` (or paste it new)
-- Compiler → v0.8.20 → Compile
-- Deploy → Environment: `Injected Provider - MetaMask` → Deploy
-- Copy deployed contract address
+### 3. Deploy Contract (only if redeploying)
+- Already deployed at **`0x2983b7A9BE9EACE315a0cf6A368FA3D8DDb787F3`** on BOT Chain (chain ID 968)
+- To redeploy: [remix.ethereum.org](https://remix.ethereum.org) → compiler v0.8.20 → Injected Provider - MetaMask → Deploy
+- Then update address in `index.html`
 
-### 4. Update Frontend
-- Open `index.html`
-- Replace `0x0000...0` with your deployed contract address
-- Save
+### 4. Deploy to Web
+- Push to GitHub (done: `github.com/AtharFazli/BOTConfessions`) — auto-deploys to GitHub Pages
+- Custom domain: `fazly.web.id` (buy ~$1-1.50, organizer reimburses)
 
-### 5. Deploy to Web
-- Push to GitHub (done: `github.com/AtharFazli/BOTConfessions`)
-- GitHub → Settings → Pages → main branch → live in 1 min
-- **Buy custom domain** ($1-1.50, any extension) → GitHub Pages → Custom domain
-  - Save receipt — **organizer reimburses after submission**
-
-### 6. Submission (due Aug 4, 11:59 PM)
+### 5. Submission (due Aug 4, 11:59 PM)
 Submit all 4:
-  1. Deployed contract address (BOT Chain)
-  2. Live website URL (GitHub Pages / custom domain)
-  3. GitHub repo link
+  1. Deployed contract address: `0x2983b7A9BE9EACE315a0cf6A368FA3D8DDb787F3`
+  2. Live website URL: `https://fazly.web.id`
+  3. GitHub repo: `https://github.com/AtharFazli/BOTConfessions`
   4. Demo video (2-3 min, show connect wallet → post → heart)
 
 ## Judging Criteria
