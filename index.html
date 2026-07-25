@@ -108,6 +108,7 @@ textarea::placeholder{color:#55556a}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/web3@1/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 const ABI = [
   {inputs:[{internalType:"string",name:"_message",type:"string"}],name:"postConfession",outputs:[],stateMutability:"payable",type:"function"},
@@ -188,7 +189,8 @@ btnPost.onclick = async () => {
     await contract.methods.postConfession(msg).send({from:account,value:'1000000000000000',gasPrice:gp});
     inputEl.value = ''; charCount.textContent = '0'; charCount.parentElement.className = 'char-count';
     loadStats(); loadList();
-  } catch(e) { alert('Failed: '+(e.message||e).slice(0,80)); }
+    Swal.fire({icon:'success',title:'Posted!',text:'Confession on-chain.',timer:2000,showConfirmButton:false,background:'#12121a',color:'#eee',iconColor:'#ff5c6c'});
+  } catch(e) { Swal.fire({icon:'error',title:'Failed',text:(e.message||e).slice(0,80),background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}); }
   btnPost.disabled = false; btnPost.textContent = 'Post · 0.001 BOT';
 };
 
@@ -237,13 +239,17 @@ async function loadList() {
 }
 
 function heartify(idx) {
-  if (!contract) return;
+  if (!account) {
+    Swal.fire({icon:'info',title:'Connect Wallet',text:'Connect wallet to send a heart.',showCancelButton:true,confirmButtonColor:'#ff5c6c',cancelButtonColor:'#333',background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}).then(r=>{if(r.isConfirmed) init()});
+    return;
+  }
   (async () => {
     try {
       const gp = await web3.eth.getGasPrice();
       await contract.methods.heart(idx).send({from:account,value:'1000000000000000',gasPrice:gp});
       loadList();
-    } catch(e) { alert('Failed: '+(e.message||e).slice(0,80)); }
+      Swal.fire({icon:'success',title:'Heart sent!',timer:1500,showConfirmButton:false,background:'#12121a',color:'#eee',iconColor:'#ff5c6c'});
+    } catch(e) { Swal.fire({icon:'error',title:'Failed',text:(e.message||e).slice(0,80),background:'#12121a',color:'#eee',iconColor:'#ff5c6c'}); }
   })();
 }
 function esc(s) {const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
