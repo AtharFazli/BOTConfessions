@@ -19,6 +19,8 @@ contract BOTConfessions {
 
     function postConfession(string calldata _message) external payable {
         require(msg.value >= POST_PRICE, "Need 0.001 tBOT");
+        require(bytes(_message).length > 0, "Empty message");
+        require(bytes(_message).length <= 500, "Max 500 chars");
         uint256 id = uint256(
             keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao, confessions.length))
         );
