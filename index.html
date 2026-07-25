@@ -72,6 +72,7 @@ const $ = s => document.querySelector(s);
 const statusEl = $('#status');
 const inputEl = $('#input');
 const btnPost = $('#btnPost');
+const btnRefresh = $('#btnRefresh');
 const listEl = $('#list');
 
 const CHAIN_ID = 968;
@@ -114,6 +115,8 @@ async function init() {
 btnPost.onclick = async () => {
   const msg = inputEl.value.trim();
   if (!msg || !contract) return;
+  if (msg.length === 0) { alert('Confession cannot be empty.'); return; }
+  if (msg.length > 500) { alert('Max 500 characters.'); return; } // ponytail: contract no limit, client guard
   btnPost.disabled = true;
   btnPost.textContent = 'Sending...';
   try {
@@ -128,6 +131,8 @@ btnPost.onclick = async () => {
 
 async function loadList() {
   if (!contract) return;
+  btnRefresh.disabled = true;
+  btnRefresh.textContent = 'Loading...';
   try {
     const data = await contract.methods.getConfessions().call();
     listEl.innerHTML = data.length
@@ -144,6 +149,8 @@ async function loadList() {
         </div>`).join('')
       : '<div class="empty">No confessions yet. Be the first!</div>';
   } catch(e) { listEl.innerHTML = '<div class="empty">Load failed.</div>'; }
+  btnRefresh.disabled = false;
+  btnRefresh.textContent = 'Refresh';
 }
 
 async function heartify(id) {
@@ -155,7 +162,7 @@ async function heartify(id) {
 }
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-$('#btnRefresh').onclick = loadList;
+btnRefresh.onclick = loadList;
 statusEl.style.cursor = 'pointer';
 statusEl.onclick = init;
 </script>
