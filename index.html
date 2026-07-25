@@ -85,16 +85,44 @@ const MAINNET_CHAIN = { id: 677, hex: '0x2a5', label: 'mainnet' };
 // ponytail: pick mainnet when deployed there
 const CHAIN = TESTNET_CHAIN;
 
-async function checkChain() {
+async function checkChain(skipSwitch) {
   const id = await web3.eth.getChainId();
-  if (id !== CHAIN.id) {
-    statusEl.className = 'off';
-    statusEl.textContent = 'Switch to BOT Chain (ID ' + CHAIN.id + ')'+ 
-    '';
-    btnPost.disabled = true;
-    return false;
+  // ponytail: loose compare — wallet may return string/hex
+  if (String(id) === String(CHAIN.id) || String(id) === CHAIN.hex) {
+    return true;
   }
-  return true;
+  statusEl.className = 'off';
+  statusEl.textContent = 'Switch to BOT Chain (ID ' + CHAIN.id + ')';
+  btnPost.disabled = true;
+  if (!skipSwitch) {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: CHAIN.hex }]
+      });
+    } catch (e) {
+      // 4902 = chain not added in wallet
+      if (e.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: CHAIN.hex,
+              chainName: 'BOT Chain ' + CHAIN.label,
+              rpcUrls: ['https://rpc.bohr.life'],
+              nativeCurrency: { name: 'tBOT', symbol: 'tBOT', decimals: 18 },
+              blockExplorerUrls: ['https://scan.bohr.life']
+            }]
+          });
+        } catch (e2) {
+          if (e2.code !== 4001) statusEl.textContent = 'Add chain failed. Add manually: rpc.bohr.life, chain ID 968';
+        }
+      } else if (e.code !== 4001) {
+        statusEl.textContent = 'Switch failed. Manually switch to BOT Chain Testnet (ID 968) in wallet.';
+      }
+    }
+  }
+  return false;
 }
 
 async function init() {
@@ -108,7 +136,14 @@ async function init() {
     if (!accounts || !accounts[0]) { statusEl.textContent = 'No accounts'; return; }
     account = accounts[0];
     contract = new web3.eth.Contract(ABI, CONTRACT);
-    if (!await checkChain()) return;
+    // attempt switch, then retry once in case chainChanged didn't fire
+    if (!await checkChain()) {
+      // ponytail: some wallets don't fire chainChanged after switch
+      await new Promise(r => setTimeout(r, 1000));
+      if (await checkChain(true)) {
+        // wallet switched but no event — continue
+      } else { return; }
+    }
     statusEl.className = 'on';
     statusEl.textContent = 'BOT Chain · ' + account.slice(0,6) + '...' + account.slice(-4);
     btnPost.disabled = false;
