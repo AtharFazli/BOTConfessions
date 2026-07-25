@@ -117,7 +117,6 @@ const ABI = [
   {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"}
 ];
 const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4";
-let web3, account, contract;
 const $ = s => document.querySelector(s);
 const statusEl = $('#status'), inputEl = $('#input'), charCount = $('#charCount');
 const btnPost = $('#btnPost'), listEl = $('#list'), totalBadge = $('#totalBadge');
@@ -125,6 +124,14 @@ const statPosts = $('#statPosts'), statHearts = $('#statHearts');
 const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet'};
 const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet'};
 const CHAIN = TESTNET_CHAIN;
+
+// ponytail: public RPC so anyone can read confessions without wallet
+const RPC = 'https://rpc.bohr.life';
+let web3 = new Web3(RPC);
+let contract = new web3.eth.Contract(ABI, CONTRACT);
+let account;
+
+loadStats(); loadList();
 
 inputEl.oninput = () => {
   const len = inputEl.value.length;
