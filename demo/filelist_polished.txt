@@ -1,3 +1,0 @@
-file 'D:\botconfessions\demo\title_anim.mp4'
-file 'D:\botconfessions\demo\recording_padded.mp4'
-file 'D:\botconfessions\demo\end_anim.mp4'

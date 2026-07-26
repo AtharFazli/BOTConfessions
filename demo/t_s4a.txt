@@ -1,1 +1,0 @@
-Solidity Smart Contract

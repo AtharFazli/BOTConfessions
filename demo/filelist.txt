@@ -1,6 +1,0 @@
-file 'D:\botconfessions\demo\title.mp4'
-file 'D:\botconfessions\demo\scene1.mp4'
-file 'D:\botconfessions\demo\scene2.mp4'
-file 'D:\botconfessions\demo\scene3.mp4'
-file 'D:\botconfessions\demo\scene4.mp4'
-file 'D:\botconfessions\demo\end.mp4'
