@@ -33,10 +33,10 @@ Both verified on explorer.
 | Symbol | `BOT` |
 | Explorer | `https://scan.botchain.ai/` |
 
-## Branches
+## Branch
 
-- **master** — testnet config
-- **mainnet** — mainnet config (`CONTRACT`, `CHAIN`, `HAS_RANGE=true`)
+- **master** — mainnet (live at fazly.web.id)
+- **testnet** — testnet config (chain 968)
 
 ## Files
 - `BOTConfessions.sol` — Solidity contract (v0.8.20)
