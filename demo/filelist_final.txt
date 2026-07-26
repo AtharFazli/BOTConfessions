@@ -1,0 +1,3 @@
+file 'D:\botconfessions\demo\title.mp4'
+file 'D:\botconfessions\demo\recording_resized.mp4'
+file 'D:\botconfessions\demo\end.mp4'

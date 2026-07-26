@@ -102,6 +102,7 @@ const ABI = [
   {inputs:[],name:"getCount",outputs:[{internalType:"uint256",name:"",type:"uint256"}],stateMutability:"view",type:"function"},
   {inputs:[{internalType:"uint256",name:"",type:"uint256"},{internalType:"address",name:"",type:"address"}],name:"hasHearted",outputs:[{internalType:"bool",name:"",type:"bool"}],stateMutability:"view",type:"function"}
 ];
+// ponytail: ganti dengan address hasil deploy mainnet
 const CONTRACT = "0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4";
 const $ = s => document.querySelector(s);
 const statusEl = $('#status'), inputEl = $('#input'), charCount = $('#charCount');
@@ -109,12 +110,11 @@ const btnPost = $('#btnPost'), listEl = $('#list');
 const statPosts = $('#statPosts'), statHearts = $('#statHearts');
 const TESTNET_CHAIN = {id:968,hex:'0x3c8',label:'testnet',rpc:'https://rpc.bohr.life',explorer:'https://scan.bohr.life',symbol:'tBOT',name:'BOT Chain Testnet'};
 const MAINNET_CHAIN = {id:677,hex:'0x2a5',label:'mainnet',rpc:'https://rpc.botchain.ai',explorer:'https://scan.botchain.ai',symbol:'BOT',name:'BOT Chain'};
-// const CHAIN = MAINNET_CHAIN; // <-- aktifin ini abis deploy contract ke mainnet, ganti CONTRACT address juga
-const CHAIN = TESTNET_CHAIN;
+const CHAIN = MAINNET_CHAIN; // mainnet
 const POST_PRICE = '1000000000000000';
 const HEART_PRICE = '1000000000000000';
 const PAGE_SIZE = 50;
-const HAS_RANGE = false; // true abis deploy contract baru (mainnet) yg punya getConfessionsRange
+const HAS_RANGE = true; // mainnet contract punya getConfessionsRange
 
 const RPC = CHAIN.rpc;
 let web3 = new Web3(RPC);
