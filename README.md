@@ -10,15 +10,21 @@ Anonymous on-chain confession board for BOTChain. Built for **GMT Build Week Hac
 - Random ID instead of sequential (privacy)
 - Connect MetaMask, no backend needed
 
-## Status
+## Live
 
-🚧 **Mainnet migration pending** — admin allocating BOT tokens, then redeploy.
+Live at **`https://fazly.web.id`** (mainnet).
 
-### Current (testnet)
-- Contract: `0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4`
-- Site: `https://fazly.web.id`
+## Contracts
 
-### Adding Mainnet to MetaMask
+| Network | Address | Explorer |
+|---------|---------|----------|
+| **Mainnet** | `0x2983b7A9BE9EACE315a0cf6A368FA3D8DDb787F3` | [scan.botchain.ai](https://scan.botchain.ai/address/0x2983b7A9BE9EACE315a0cf6A368FA3D8DDb787F3) |
+| Testnet | `0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4` | [scan.botchain.ai](https://scan.botchain.ai/address/0x04e6db5BE9861fbEd3E7a4192A3444a7D0e07cb4) |
+
+Both verified on explorer.
+
+## Adding BOT Chain Mainnet to MetaMask
+
 | Field | Value |
 |-------|-------|
 | Network Name | BOT Chain Mainnet |
@@ -27,31 +33,10 @@ Anonymous on-chain confession board for BOTChain. Built for **GMT Build Week Hac
 | Symbol | `BOT` |
 | Explorer | `https://scan.botchain.ai/` |
 
-### Redeploy Steps (when tokens arrive)
-1. Buka `https://remix.ethereum.org`
-2. Paste `BOTConfessions.sol` — compiler v0.8.20
-3. Deploy via Injected Provider (MetaMask on mainnet)
-4. Copy new address → update `index.html`:
-   - `CONTRACT` → new address
-   - `const CHAIN = MAINNET_CHAIN;` (uncomment that line)
-5. Commit & push → auto deploy to GitHub Pages
+## Branches
 
-## Submission (due Aug 4, 11:59 PM)
-Submit all 4:
-  1. Deployed contract address (mainnet)
-  2. Live website URL: `https://fazly.web.id`
-  3. GitHub repo: `https://github.com/AtharFazli/BOTConfessions`
-  4. Demo video (2-3 min, show connect wallet → post → heart)
-
-## Judging Criteria
-| Item | Points |
-|------|--------|
-| Contract deployed & working | 30 |
-| Anyone can connect & use | 25 |
-| Unique wallets interacted | 20 |
-| Use case originality | 15 |
-| Demo video quality | 10 |
-| **Total** | **100** |
+- **master** — testnet config
+- **mainnet** — mainnet config (`CONTRACT`, `CHAIN`, `HAS_RANGE=true`)
 
 ## Files
 - `BOTConfessions.sol` — Solidity contract (v0.8.20)
